@@ -148,8 +148,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelLoader\ModelLoader.hpp" />
-    <ClInclude Include="PMDDataStruct.hpp" />
-    <ClInclude Include="PMXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

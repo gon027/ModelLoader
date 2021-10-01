@@ -38,10 +38,10 @@
     <ClInclude Include="ModelLoader\ModelLoader.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="PMXDataStruct.hpp">
+    <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp">
       <Filter>PMX</Filter>
     </ClInclude>
-    <ClInclude Include="PMDDataStruct.hpp">
+    <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp">
       <Filter>PMD</Filter>
     </ClInclude>
   </ItemGroup>
