@@ -13,10 +13,36 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="PMX">
+      <UniqueIdentifier>{6370a586-ba57-46fa-99eb-efccba69bca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PMD">
+      <UniqueIdentifier>{2eb5734c-5303-4805-91cf-29b993df8a71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBX">
+      <UniqueIdentifier>{93c54ae3-0773-4ca4-b325-c3bd7dc936b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{71029375-98c0-46b5-87a4-39ebae61c9e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ModelLoader.cpp">
+    <ClCompile Include="ModelLoader\ModelLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ModelLoader\ModelLoader.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="PMXDataStruct.hpp">
+      <Filter>PMX</Filter>
+    </ClInclude>
+    <ClInclude Include="PMDDataStruct.hpp">
+      <Filter>PMD</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
