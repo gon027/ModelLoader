@@ -44,5 +44,14 @@
     <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp">
       <Filter>PMD</Filter>
     </ClInclude>
+    <ClInclude Include="ModelLoader\PMX\PMXFile.hpp">
+      <Filter>PMX</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader\PMD\PMDFile.hpp">
+      <Filter>PMD</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

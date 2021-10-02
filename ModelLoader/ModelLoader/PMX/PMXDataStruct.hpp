@@ -5,9 +5,36 @@
 #include <array>
 #include <variant>
 
-using VString = std::variant <std::string, std::wstring>;
-
 namespace model::pmx {
+
+	using VString = std::variant <std::string, std::wstring>;
+
+	struct ByteType {
+		union {
+			struct {
+				unsigned char encodeType;
+				unsigned char addUV;
+				unsigned char vertexIndex;
+				unsigned char materialIndex;
+				unsigned char textureIndex;
+				unsigned char bourneIndex;
+				unsigned char morphIndex;
+				unsigned char bodyIndex;
+			};
+
+			unsigned char m[8];
+		};
+	};
+
+	// ウェイト
+	struct VertexWeight {
+		unsigned char weight;
+		BoneIndex boneIndex;
+		WeightValue weightValue;
+		float sdef_c[3];
+		float sdef_r0[3];
+		float sdef_r1[3];
+	};
 
 	// ボーンインデックス
 	struct BoneIndex {
@@ -52,35 +79,6 @@ namespace model::pmx {
 		Subtexture = 3,
 	};
 
-
-	// -----
-	struct ByteType {
-		union {
-			struct {
-				unsigned char encodeType;
-				unsigned char addUV;
-				unsigned char vertexIndex;
-				unsigned char materialIndex;
-				unsigned char textureIndex;
-				unsigned char bourneIndex;
-				unsigned char morphIndex;
-				unsigned char bodyIndex;
-			};
-
-			unsigned char m[8];
-		};
-	};
-
-	// ウェイト
-	struct VertexWeight {
-		unsigned char weight;
-		BoneIndex boneIndex;
-		WeightValue weightValue;
-		float sdef_c[3];
-		float sdef_r0[3];
-		float sdef_r1[3];
-	};
-
 	/// <summary>
 	/// ヘッダー部
 	/// </summary>
@@ -104,7 +102,6 @@ namespace model::pmx {
 	/// <summary>
 	/// 頂点
 	/// </summary>
-	template<class Float2, class Float3, class Float4>
 	struct PMXVertex {
 		float position[3];
 		float normal[3];
@@ -149,7 +146,14 @@ namespace model::pmx {
 	/// ボーン
 	/// </summary>
 	struct Bourne {
+		VString name;
+		VString eng;
 
+		float position[3];
+		unsigned int parentBoneIndex;
+		int henkei;
+
+		int boneFlag;
 	};
 
 	/// <summary>

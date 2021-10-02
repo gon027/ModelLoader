@@ -29,15 +29,8 @@ namespace model::pmd {
     };
 
     /// <summary>
-    /// インデックスデータ
+    /// マテリアル
     /// </summary>
-    struct IndexList {
-        std::vector<unsigned int> faceVertIndex; // unsigned short
-    };
-
-    /// <summary>
-   /// マテリアル
-   /// </summary>
     struct Material {
         float diffuseColor[3];
         float alpha;

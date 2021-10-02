@@ -147,9 +147,12 @@
     <ClCompile Include="ModelLoader\ModelLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\PMD\PMDFile.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\PMX\PMXFile.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
