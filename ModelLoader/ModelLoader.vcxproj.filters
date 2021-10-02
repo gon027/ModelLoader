@@ -33,11 +33,11 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\PMD\PMDLoader.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp">
+      <Filter>PMD</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\PMX\PMXLoader.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp">
+      <Filter>PMX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,13 +57,13 @@
       <Filter>PMD</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>FBX</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader\PMD\PMDLoader.hpp">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>PMD</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp">
+      <Filter>PMX</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

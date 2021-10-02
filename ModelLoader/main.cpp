@@ -18,7 +18,7 @@ int main()
 	*/
 
 	IModelLoader* pmxLoader = new pmx::PMXLoader{};
-	if (!pmxLoader->load("", "TestModel/SiroDanceCostume_v1.0/siro_dance_costume_v1.0.pmx", "tex")) {
+	if (!pmxLoader->load("TestModel/SiroDanceCostume_v1.0/", "siro_dance_costume_v1.0.pmx", "tex")) {
 		std::cout << "ƒ_ƒ[" << std::endl;
 		return -1;
 	}
