@@ -26,16 +26,6 @@ namespace model::pmx {
 		};
 	};
 
-	// ウェイト
-	struct VertexWeight {
-		unsigned char weight;
-		BoneIndex boneIndex;
-		WeightValue weightValue;
-		float sdef_c[3];
-		float sdef_r0[3];
-		float sdef_r1[3];
-	};
-
 	// ボーンインデックス
 	struct BoneIndex {
 		union {
@@ -62,6 +52,16 @@ namespace model::pmx {
 
 			float m[4];
 		};
+	};
+
+	// ウェイト
+	struct VertexWeight {
+		unsigned char weight;
+		BoneIndex boneIndex;
+		WeightValue weightValue;
+		float sdef_c[3];
+		float sdef_r0[3];
+		float sdef_r1[3];
 	};
 
 	namespace DrawFlag {

@@ -20,7 +20,7 @@ namespace model::pmd {
     /// 頂点データ
     /// </summary>
     struct VertexData {
-        float pos[3];
+        float position[3];
         float normal[3];
         float uv[2];
         unsigned short boneNum[2];
