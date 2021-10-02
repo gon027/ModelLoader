@@ -10,7 +10,7 @@ namespace model::pmx {
 		PMXLoader();
 		~PMXLoader() = default;
 
-		bool load(const std::string& _modelPath, const std::string _texPath) override;
+		bool load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir) override;
 
 	private:
 		PMXFile pmxFile;

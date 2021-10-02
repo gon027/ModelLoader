@@ -11,10 +11,10 @@ namespace model::pmd {
 	{
 	}
 
-	bool PMDLoader::load(const std::string& _modelPath, const std::string _texPath)
+	bool PMDLoader::load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir)
 	{
 
-		std::ifstream ifs{ _modelPath, std::ios::in | std::ios::binary };
+		std::ifstream ifs{ _modelDir + _modelFile, std::ios::in | std::ios::binary };
 		if (!ifs) {
 			return false;
 		}
@@ -25,10 +25,10 @@ namespace model::pmd {
 			ifs.read((char*)&pmdFile.header.modelName, sizeof(pmdFile.header.modelName));
 			ifs.read((char*)&pmdFile.header.comment, sizeof(pmdFile.header.comment));
 
-			std::cout << pmdFile.header.name << std::endl;
-			std::cout << pmdFile.header.version << std::endl;
-			std::cout << pmdFile.header.modelName << std::endl;
-			std::cout << pmdFile.header.comment << std::endl;
+			// std::cout << pmdFile.header.name << std::endl;
+			// std::cout << pmdFile.header.version << std::endl;
+			// std::cout << pmdFile.header.modelName << std::endl;
+			// std::cout << pmdFile.header.comment << std::endl;
 		}
 
 		{
