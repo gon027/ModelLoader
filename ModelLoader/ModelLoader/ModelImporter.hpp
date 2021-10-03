@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include "ModelData.hpp"
 
 template<class T>
@@ -24,17 +25,22 @@ private:
 	Singleton&& operator= (Singleton&&);
 };
 
+using ModelDataPtr = std::shared_ptr<model::ModelData>;
+using ModelList = std::unordered_map<std::string, ModelDataPtr>;
+
 class ModelImporter : public Singleton<ModelImporter> {
 	friend Singleton<ModelImporter>;
 
 public:
 	void loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir);
 
-	model::ModelData& getModelData(const std::string& _name);
+	ModelDataPtr getModelData(const std::string& _name);
+
+	ModelDataPtr getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir);
 
 protected:
 	ModelImporter();
 
 private:
-	std::unordered_map<std::string, model::ModelData> modelList;
+	ModelList modelList;
 };
