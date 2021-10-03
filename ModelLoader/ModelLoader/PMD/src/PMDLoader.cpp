@@ -11,7 +11,7 @@ namespace model::pmd {
 	{
 	}
 
-	bool PMDLoader::load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir)
+	bool PMDLoader::load(const std::string& _modelDir, const std::string& _modelFile)
 	{
 
 		std::ifstream ifs{ _modelDir + _modelFile, std::ios::in | std::ios::binary };

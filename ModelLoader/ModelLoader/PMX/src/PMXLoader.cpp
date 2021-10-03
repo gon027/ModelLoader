@@ -72,7 +72,7 @@ namespace model::pmx {
 	{
 	}
 
-	bool PMXLoader::load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir)
+	bool PMXLoader::load(const std::string& _modelDir, const std::string& _modelFile)
 	{
 
 		std::ifstream ifs{ _modelDir + _modelFile , std::ios::in | std::ios::binary };
@@ -173,7 +173,7 @@ namespace model::pmx {
 				auto texturePath = readString(ifs, header.byteType.encodeType);
 
 				if (std::holds_alternative<std::string>(texturePath)) {
-					textures[i] = { _modelDir + _texDir + "/" + std::get<std::string>(texturePath)};
+					textures[i] = { _modelDir + std::get<std::string>(texturePath)};
 				}
 
 				if (std::holds_alternative<std::wstring>(texturePath)) {

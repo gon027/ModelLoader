@@ -44,7 +44,8 @@ namespace {
 			for (size_t i{ 0 }; i < materialSize; ++i) {
 
 				std::string textureStr{ _pmdFile.materials[i].textureFileName };
-				if (textureStr == "") {
+				// TODO: もう少し処理を最適化する
+				if (textureStr[textureStr.size() - 1] == '/') { // パスの最後の文字が/なら、画像へのパスがないので追加する
 					_modelData->materials[i].textureName = _modelData->materials[i - 1].textureName;
 				}
 				else {
@@ -101,13 +102,13 @@ ModelImporter::ModelImporter()
 {
 }
 
-void ModelImporter::loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir)
+void ModelImporter::loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile)
 {
 	std::string extension = getExtension(_modelFile);
 
 	if (extension == "pmd") {
 		model::pmd::PMDLoader pmdLoader{};
-		pmdLoader.load(_modelDir, _modelFile, _texDir);
+		pmdLoader.load(_modelDir, _modelFile);
 
 		ModelDataPtr modelData{ new model::ModelData{} };
 		convertPMDToModelData(modelData, pmdLoader.getFile());
@@ -117,7 +118,7 @@ void ModelImporter::loadModel(const std::string& _name, const std::string& _mode
 
 	if (extension == "pmx") {
 		model::pmx::PMXLoader pmxLoader{};
-		pmxLoader.load(_modelDir, _modelFile, _texDir);
+		pmxLoader.load(_modelDir, _modelFile);
 
 		ModelDataPtr modelData{ new model::ModelData{} };
 		convertPMXToModelData(modelData, pmxLoader.getFile());
@@ -136,10 +137,10 @@ ModelDataPtr ModelImporter::getModelData(const std::string& _name)
 	return modelList[_name];
 }
 
-ModelDataPtr ModelImporter::getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir)
+ModelDataPtr ModelImporter::getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile)
 {
 	if (!modelList.contains(_name)) {
-		loadModel(_name, _modelDir, _modelFile, _texDir);
+		loadModel(_name, _modelDir, _modelFile);
 	}
 
 	return modelList[_name];

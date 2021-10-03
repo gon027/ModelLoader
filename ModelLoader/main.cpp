@@ -10,11 +10,13 @@ int main()
 {
 	using namespace model;
 
-	ModelImporter::getIns()->loadModel("Miku", "TestModel/Miku/", "Lat式ミクVer2.31_Normal.pmd", "tex");
-	ModelImporter::getIns()->loadModel("Siro", "TestModel/SiroDanceCostume_v1.0/", "siro_dance_costume_v1.0.pmx", "tex");
+	ModelImporter::getIns()->loadModel("Miku", "TestModel/Miku/", "Lat式ミクVer2.31_Normal.pmd");
+	ModelImporter::getIns()->loadModel("Siro", "TestModel/SiroDanceCostume_v1.0/", "siro_dance_costume_v1.0.pmx");
+	ModelImporter::getIns()->loadModel("Shachiku", "TestModel/Shachiku/", "社畜ちゃん Ver3.1.pmd");
 		
 	auto modelData1 = ModelImporter::getIns()->getModelData("Siro");
 	auto modelData2 = ModelImporter::getIns()->getModelData("Miku");
+	auto modelData3 = ModelImporter::getIns()->getModelData("Shachiku");
 
 	cout << 1 << endl;
 

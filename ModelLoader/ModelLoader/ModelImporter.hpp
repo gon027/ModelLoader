@@ -32,11 +32,11 @@ class ModelImporter : public Singleton<ModelImporter> {
 	friend Singleton<ModelImporter>;
 
 public:
-	void loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir);
+	void loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);
 
 	ModelDataPtr getModelData(const std::string& _name);
 
-	ModelDataPtr getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir);
+	ModelDataPtr getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);
 
 protected:
 	ModelImporter();

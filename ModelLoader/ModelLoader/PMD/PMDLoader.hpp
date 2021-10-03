@@ -11,7 +11,7 @@ namespace model::pmd {
 		PMDLoader();
 		~PMDLoader() = default;
 
-		bool load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir) override;
+		bool load(const std::string& _modelDir, const std::string& _modelFile) override;
 
 		inline PMDFile& getFile() {
 			return pmdFile;
