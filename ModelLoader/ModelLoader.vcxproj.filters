@@ -65,7 +65,7 @@
     <ClInclude Include="model_debugger.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelData.hpp">
+    <ClInclude Include="ModelLoader\ModelData.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

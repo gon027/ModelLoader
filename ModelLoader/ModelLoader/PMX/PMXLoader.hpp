@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ModelLoader.hpp"
+#include "../../ModelData.hpp"
 #include "PMXFile.hpp"
 
 namespace model::pmx {
@@ -18,6 +19,7 @@ namespace model::pmx {
 
 	private:
 		PMXFile pmxFile;
+		ModelData modelData;
 	};
 
 }

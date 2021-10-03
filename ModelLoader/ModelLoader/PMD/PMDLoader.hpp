@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ModelLoader.hpp"
+#include "../ModelData.hpp"
 #include "PMDFile.hpp"
 
 namespace model::pmd {
@@ -12,12 +13,12 @@ namespace model::pmd {
 
 		bool load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir) override;
 
-		inline PMDFile& getFile() {
-			return pmdFile;
+		inline ModelData& getFile() {
+			return modelData;
 		}
 
 	private:
-		PMDFile pmdFile;
+		ModelData modelData;
 	};
 
 }

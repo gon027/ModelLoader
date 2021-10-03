@@ -148,7 +148,7 @@
     <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ModelData.hpp" />
+    <ClInclude Include="ModelLoader\ModelData.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />

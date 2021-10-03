@@ -23,9 +23,4 @@ inline void pmxDebug(model::pmx::PMXLoader* _pmx) {
 inline void pmdDebug(model::pmd::PMDLoader* _pmd) {
 	auto& file = _pmd->getFile();
 
-	std::cout << file.header.modelName << std::endl;
-	std::cout << file.header.version << std::endl;
-	std::cout << file.header.comment << std::endl;
-	std::cout << file.header.name << std::endl;
-
 }
