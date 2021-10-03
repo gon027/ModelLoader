@@ -36,6 +36,9 @@
     <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp">
       <Filter>PMX</Filter>
     </ClCompile>
+    <ClCompile Include="ModelLoader\ModelImporter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelLoader\ModelLoader.hpp">
@@ -66,6 +69,9 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader\ModelData.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader\ModelImporter.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

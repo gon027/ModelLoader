@@ -144,12 +144,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelLoader\ModelImporter.cpp" />
     <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp" />
     <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelLoader\ModelData.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\ModelImporter.hpp" />
     <ClInclude Include="ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />
     <ClInclude Include="ModelLoader\PMD\PMDFile.hpp" />

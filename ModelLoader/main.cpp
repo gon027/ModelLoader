@@ -8,42 +8,44 @@ using namespace std;
 #include "ModelLoader/PMX/PMXLoader.hpp"
 
 #include "model_debugger.h"
-#include "ModelData.hpp"
+#include "ModelLoader/ModelData.hpp"
+
+#include "ModelLoader/ModelImporter.hpp"
 
 int main()
 {
 	using namespace model;
+	std::vector<ModelData> ms;
 
-	std::unique_ptr<pmd::PMDLoader> pmdLoader{ new pmd::PMDLoader{} };
-	if (!pmdLoader->load("TestModel/Miku/", "Lat式ミクVer2.31_Normal.pmd", "tex")) {
-		std::cout << "ダメー" << std::endl;
-		return -1;
-	}
+	ModelImporter::getIns()->loadModel("Miku", "TestModel/Miku/", "Lat式ミクVer2.31_Normal.pmd", "tex");
 
-	std::unique_ptr<pmx::PMXLoader> pmxLoader{ new pmx::PMXLoader{} };
-	if (!pmxLoader->load("TestModel/SiroDanceCostume_v1.0/", "siro_dance_costume_v1.0.pmx", "tex")) {
-		std::cout << "ダメー" << std::endl;
-		return -1;
-	}
-
-	ModelData modelData = pmdLoader->getFile();
+	//auto& m = ModelImporter::getIns()->getModelData("Miku");
+		
 	{
-		cout << std::get<0>(modelData.modelName) << endl;
+		ModelData& modelData = ModelImporter::getIns()->getModelData("Miku");;
+		ms.emplace_back(modelData);
+		
+		{
+			cout << std::get<0>(modelData.modelName) << endl;
 
-		for (size_t i{ 0 }; i < 10; ++i) {
-			std::cout << "x = " << modelData.vertexes[i].position[0] << std::endl;
-			std::cout << "y = " << modelData.vertexes[i].position[1] << std::endl;
-			std::cout << "z = " << modelData.vertexes[i].position[2] << std::endl;
-		}
+			for (size_t i{ 0 }; i < 10; ++i) {
+				std::cout << "x = " << modelData.vertexes[i].position[0] << std::endl;
+				std::cout << "y = " << modelData.vertexes[i].position[1] << std::endl;
+				std::cout << "z = " << modelData.vertexes[i].position[2] << std::endl;
+			}
 
-		for (int i = 0; i < 10; ++i) {
-			cout << modelData.indexes[i] << endl;
-		}
+			for (int i = 0; i < 10; ++i) {
+				cout << modelData.indexes[i] << endl;
+			}
 
-		for (size_t i{ 0 }; i < modelData.materials.size(); ++i) {
-			cout << std::get<0>(modelData.materials[i].textureName) << endl;
-			cout << modelData.materials[i].vertCount   << endl;
+			for (size_t i{ 0 }; i < modelData.materials.size(); ++i) {
+				cout << std::get<0>(modelData.materials[i].textureName) << endl;
+				cout << modelData.materials[i].vertCount << endl;
+			}
 		}
 	}
+	
+
+	//cout << std::get<0>(ms[0].modelName) << endl;
 }
 

@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <cstring>
 
 namespace model::pmx {
 
@@ -49,7 +50,6 @@ namespace model::pmx {
 		void readBinaryData(std::ifstream& _ifs, T& _data, std::streamsize _streamsize) {
 			_ifs.read(reinterpret_cast<char*>(std::addressof(_data)), _streamsize);
 		}
-
 	}
 
 	PMXLoader::PMXLoader()

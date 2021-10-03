@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ModelLoader.hpp"
-#include "../../ModelData.hpp"
+#include "../ModelData.hpp"
 #include "PMXFile.hpp"
 
 namespace model::pmx {

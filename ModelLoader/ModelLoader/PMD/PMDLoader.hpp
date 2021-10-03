@@ -13,12 +13,12 @@ namespace model::pmd {
 
 		bool load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir) override;
 
-		inline ModelData& getFile() {
-			return modelData;
+		inline PMDFile& getFile() {
+			return pmdFile;
 		}
 
 	private:
-		ModelData modelData;
+		PMDFile pmdFile;
 	};
 
 }
