@@ -144,11 +144,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ModelLoader\ModelLoader.cpp" />
     <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp" />
     <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ModelData.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />
@@ -157,6 +157,7 @@
     <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXFile.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp" />
+    <ClInclude Include="model_debugger.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -7,7 +7,7 @@
 namespace model::pmx {
 
 	struct PMXFile {
-		PMXHeader header;
+		// PMXHeader header;
 		ModelInfo modelInfo;
 		std::vector<PMXVertex> vertexes;
 		std::vector<unsigned int> indexes;

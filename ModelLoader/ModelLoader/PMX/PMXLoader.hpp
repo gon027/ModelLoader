@@ -12,6 +12,10 @@ namespace model::pmx {
 
 		bool load(const std::string& _modelDir, const std::string& _modelFile, const std::string _texDir) override;
 
+		inline PMXFile& getFile() {
+			return pmxFile;
+		}
+
 	private:
 		PMXFile pmxFile;
 	};

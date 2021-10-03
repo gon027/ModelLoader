@@ -65,7 +65,8 @@ namespace model::pmx {
 			return false;
 		}
 
-		auto& header = pmxFile.header;
+		// auto& header = pmxFile.header;
+		PMXHeader header{};
 		{
 			ifs.read((char*)&header.extension, sizeof(header.extension));
 			ifs.read((char*)&header.version, sizeof(header.version));
