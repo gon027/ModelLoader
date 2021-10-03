@@ -25,11 +25,6 @@ namespace model::pmd {
 			ifs.read((char*)&pmdFile.header.version, sizeof(pmdFile.header.version));
 			ifs.read((char*)&pmdFile.header.modelName, sizeof(pmdFile.header.modelName));
 			ifs.read((char*)&pmdFile.header.comment, sizeof(pmdFile.header.comment));
-
-			// std::cout << pmdFile.header.name << std::endl;
-			// std::cout << pmdFile.header.version << std::endl;
-			// std::cout << pmdFile.header.modelName << std::endl;
-			// std::cout << pmdFile.header.comment << std::endl;
 		}
 
 		{
@@ -74,7 +69,13 @@ namespace model::pmd {
 				ifs.read((char*)&pmdMaterials[i].toonIndex,       sizeof(pmdMaterials[i].toonIndex));
 				ifs.read((char*)&pmdMaterials[i].edgeFlag,        sizeof(pmdMaterials[i].edgeFlag));
 				ifs.read((char*)&pmdMaterials[i].faceVertCount,   sizeof(pmdMaterials[i].faceVertCount));
-				ifs.read((char*)&pmdMaterials[i].textureFileName, sizeof(pmdMaterials[i].textureFileName));
+
+				{
+					char texName[20];
+					ifs.read((char*)&texName, sizeof(texName));
+
+					pmdMaterials[i].textureFileName = { _modelDir + texName };
+				}
 			}
 		}
 

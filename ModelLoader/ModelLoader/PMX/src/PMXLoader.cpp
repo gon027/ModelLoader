@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#include <variant>
 
 namespace model::pmx {
 
@@ -50,6 +51,20 @@ namespace model::pmx {
 		void readBinaryData(std::ifstream& _ifs, T& _data, std::streamsize _streamsize) {
 			_ifs.read(reinterpret_cast<char*>(std::addressof(_data)), _streamsize);
 		}
+
+		std::wstring convertWString(const std::string& _str) {
+			size_t len = _str.size();  // •¶š—ñ‚Ì’·‚³
+			size_t convLen;            // •ÏŠ·Œã•¶š—ñ
+
+			// •¶š—ñ‚ÌŠi”[êŠ
+			wchar_t* wc = new wchar_t[sizeof(wchar_t) * (len + 2)];
+			mbstowcs_s(&convLen, wc, len + 1, _str.c_str(), _TRUNCATE);
+
+			std::wstring res{ wc };
+			delete[] wc;
+
+			return res;
+		};
 	}
 
 	PMXLoader::PMXLoader()
@@ -154,7 +169,16 @@ namespace model::pmx {
 			pmxFile.textures.resize(textureSize);
 			auto& textures = pmxFile.textures;
 			for (size_t i{ 0 }; i < textureSize; ++i) {
-				textures[i] = readString(ifs, header.byteType.encodeType);
+
+				auto texturePath = readString(ifs, header.byteType.encodeType);
+
+				if (std::holds_alternative<std::string>(texturePath)) {
+					textures[i] = { _modelDir + _texDir + "/" + std::get<std::string>(texturePath)};
+				}
+
+				if (std::holds_alternative<std::wstring>(texturePath)) {
+					textures[i] = { convertWString(_modelDir) + std::get<std::wstring>(texturePath) };
+				}
 			}
 		}
 

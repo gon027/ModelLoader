@@ -8,7 +8,7 @@ namespace model::pmd {
 	struct PMDFile {
 		PMDHeader header;
 		std::vector<VertexData> vertexes;
-		std::vector<unsigned int> indexes; // unsigned short
+		std::vector<unsigned int> indexes;
 		std::vector<Material> materials;
 	};
 

@@ -40,7 +40,7 @@ namespace model::pmd {
         unsigned char toonIndex;
         unsigned char edgeFlag;
         unsigned long faceVertCount;
-        char textureFileName[20];
+        std::string textureFileName;
     };
 
 }
