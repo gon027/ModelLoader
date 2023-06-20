@@ -5,7 +5,7 @@
 #include <variant>
 #include <cstring>
 
-namespace su {
+namespace util {
 
 	template <class String>
 	String getExtension(const String& _path) {

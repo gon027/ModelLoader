@@ -95,5 +95,8 @@
     <ClInclude Include="ModelLoader\Utility\StringUtility.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="ModelLoader\ModelHeader.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

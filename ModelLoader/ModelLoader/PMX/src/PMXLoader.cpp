@@ -162,7 +162,7 @@ namespace model::pmx {
 			pmxFile.textures.resize(textureSize);
 			auto& textures = pmxFile.textures;
 
-			auto modelDirectory = su::convertToWString(_modelDir);
+			auto modelDirectory = util::convertToWString(_modelDir);
 			for (size_t i{ 0 }; i < textureSize; ++i) {
 				auto texturePath = readString(ifs, header.byteType.encodeType);
 				

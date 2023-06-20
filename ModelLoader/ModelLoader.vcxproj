@@ -157,6 +157,7 @@
     <ClInclude Include="ModelLoader\FBX\FBXLoader.hpp" />
     <ClInclude Include="ModelLoader\ModelData.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\ModelHeader.hpp" />
     <ClInclude Include="ModelLoader\ModelImporter.hpp" />
     <ClInclude Include="ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />

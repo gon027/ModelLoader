@@ -15,8 +15,8 @@ namespace {
 	void convertPMDToModelData(ModelDataPtr& _modelData, const model::pmd::PMDFile& _pmdFile) {
 
 		_modelData->extension = "pmd";
-		_modelData->modelName = su::getWString(_pmdFile.header.modelName);
-		su::rep(_modelData->modelName, L"\\", L"/");
+		_modelData->modelName = util::getWString(_pmdFile.header.modelName);
+		util::rep(_modelData->modelName, L"\\", L"/");
 
 		{
 			size_t vertexSize = _pmdFile.vertexes.size();
@@ -48,12 +48,12 @@ namespace {
 					// スフィアマップを取り除く
 					auto idx = textureStr.find('*');
 					if (idx != std::string::npos) {
-						std::wcout << su::getWString(textureStr.substr(idx + 1, textureStr.size())) << std::endl;
+						std::wcout << util::getWString(textureStr.substr(idx + 1, textureStr.size())) << std::endl;
 						textureStr = textureStr.substr(0, idx);
 					}
 
-					_modelData->materials[i].textureName = su::getWString(textureStr);
-					su::rep(_modelData->materials[i].textureName, L"\\", L"/");
+					_modelData->materials[i].textureName = util::getWString(textureStr);
+					util::rep(_modelData->materials[i].textureName, L"\\", L"/");
 				}
 				_modelData->materials[i].vertCount = _pmdFile.materials[i].faceVertCount;
 			}
@@ -63,7 +63,7 @@ namespace {
 	// PMXの形式からModelDataの形式に変換
 	void convertPMXToModelData(ModelDataPtr& _modelData, const model::pmx::PMXFile& _pmxFile) {
 		_modelData->extension = "pmx";
-		_modelData->modelName = su::getWString(_pmxFile.modelInfo.modelName);
+		_modelData->modelName = util::getWString(_pmxFile.modelInfo.modelName);
 
 		{
 			size_t vertexSize = _pmxFile.vertexes.size();
@@ -100,15 +100,15 @@ namespace {
 			for (size_t i{ 0 }; i < MaterialSize; ++i) {
 				auto textureIndex = _pmxFile.materials[i].normalTextureIndex;
 
-				_modelData->materials[i].materialName = su::getWString(_pmxFile.materials[i].materialName);
+				_modelData->materials[i].materialName = util::getWString(_pmxFile.materials[i].materialName);
 				_modelData->materials[i].vertCount = _pmxFile.materials[i].surface;
 
 				if (textureIndex == 0xFF) {
 					// textureIndex = 0;
 					continue;
 				}
-				_modelData->materials[i].textureName = su::getWString(_pmxFile.textures[textureIndex]);
-				su::rep(_modelData->materials[i].textureName, L"\\", L"/");
+				_modelData->materials[i].textureName = util::getWString(_pmxFile.textures[textureIndex]);
+				util::rep(_modelData->materials[i].textureName, L"\\", L"/");
 			}
 		}
 
@@ -118,8 +118,8 @@ namespace {
 				auto sphereIndex = _pmxFile.materials[i].sphereTextureIndex;
 				if(sphereIndex != 0xff){
 					_modelData->materials[i].mode = _pmxFile.materials[i].mode;
-					_modelData->materials[i].sphereName = su::getWString(_pmxFile.textures[sphereIndex]);
-					su::rep(_modelData->materials[i].sphereName, L"\\", L"/");
+					_modelData->materials[i].sphereName = util::getWString(_pmxFile.textures[sphereIndex]);
+					util::rep(_modelData->materials[i].sphereName, L"\\", L"/");
 				}
 			}
 		}
@@ -130,8 +130,8 @@ namespace {
 				auto toonIndex = _pmxFile.materials[i].indexSize;
 				// if (toonIndex != 0xff) {
 				if (toonIndex < _pmxFile.textures.size()) {
-					_modelData->materials[i].toonName = su::getWString(_pmxFile.textures[toonIndex]);
-					su::rep(_modelData->materials[i].toonName, L"\\", L"/");
+					_modelData->materials[i].toonName = util::getWString(_pmxFile.textures[toonIndex]);
+					util::rep(_modelData->materials[i].toonName, L"\\", L"/");
 				}
 			}
 		}
@@ -150,7 +150,7 @@ void ModelImporter::loadModel(const std::string& _name, const ModelDesc& _modelD
 
 void ModelImporter::loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile)
 {
-	std::string extension = su::getExtension(_modelFile);
+	std::string extension = util::getExtension(_modelFile);
 
 	if (extension == "pmd") {
 		model::pmd::PMDLoader pmdLoader{};
