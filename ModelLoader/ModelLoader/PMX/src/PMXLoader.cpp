@@ -2,8 +2,9 @@
 
 #include <fstream>
 #include <string>
-#include <cstring>
 #include <variant>
+
+#include "../../Utility/StringUtility.hpp"
 
 namespace model::pmx {
 
@@ -38,7 +39,6 @@ namespace model::pmx {
 				resultStr = str;
 			}
 
-
 			return resultStr;
 		}
 
@@ -52,19 +52,6 @@ namespace model::pmx {
 			_ifs.read(reinterpret_cast<char*>(std::addressof(_data)), _streamsize);
 		}
 
-		std::wstring convertWString(const std::string& _str) {
-			size_t len = _str.size();  // •¶š—ñ‚Ì’·‚³
-			size_t convLen;            // •ÏŠ·Œã•¶š—ñ
-
-			// •¶š—ñ‚ÌŠi”[êŠ
-			wchar_t* wc = new wchar_t[sizeof(wchar_t) * (len + 2)];
-			mbstowcs_s(&convLen, wc, len + 1, _str.c_str(), _TRUNCATE);
-
-			std::wstring res{ wc };
-			delete[] wc;
-
-			return res;
-		};
 	}
 
 	PMXLoader::PMXLoader()
@@ -100,6 +87,7 @@ namespace model::pmx {
 		{
 			int vertexSize;
 			readBinaryData(ifs, vertexSize);
+			// std::cout << vertexSize << std::endl;
 
 			pmxFile.vertexes.resize(vertexSize);
 			auto& vertexes = pmxFile.vertexes;
@@ -108,10 +96,11 @@ namespace model::pmx {
 				readBinaryData(ifs, vertexes[i].normal);
 				readBinaryData(ifs, vertexes[i].uv);
 
-				readBinaryData(ifs, vertexes[i].addUV, 16LL * header.byteType.addUV);
+				readBinaryData(ifs, vertexes[i].addUV, sizeof(float[4]) * header.byteType.addUV);
 
 				unsigned char weight{};
 				readBinaryData(ifs, weight);
+				// std::cout << (int)weight << std::endl;
 				switch (weight)
 				{
 				case 0: // BDEF1
@@ -121,19 +110,24 @@ namespace model::pmx {
 				}
 				case 1: // BDEF2
 				{
-					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m, header.byteType.bourneIndex * 2LL);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[0], header.byteType.bourneIndex);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[1], header.byteType.bourneIndex);
 					readBinaryData(ifs, vertexes[i].vertexWeight.weightValue.m, sizeof(float));
 					break;
 				}
 				case 2: // BDEF4
 				{
-					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m, header.byteType.bourneIndex * 4LL);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[0], header.byteType.bourneIndex);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[1], header.byteType.bourneIndex);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[2], header.byteType.bourneIndex);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[3], header.byteType.bourneIndex);
 					readBinaryData(ifs, vertexes[i].vertexWeight.weightValue.m, sizeof(float) * 4LL);
 					break;
 				}
 				case 3: // SDEF
 				{
-					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m, header.byteType.bourneIndex * 2LL);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[0], header.byteType.bourneIndex);
+					readBinaryData(ifs, vertexes[i].vertexWeight.boneIndex.m[1], header.byteType.bourneIndex);
 					readBinaryData(ifs, vertexes[i].vertexWeight.weightValue.m, sizeof(float));
 
 					readBinaryData(ifs, vertexes[i].vertexWeight.sdef_c);
@@ -145,7 +139,6 @@ namespace model::pmx {
 				default:
 					break;
 				}
-
 
 				readBinaryData(ifs, vertexes[i].edgeScale);
 			}
@@ -168,16 +161,17 @@ namespace model::pmx {
 
 			pmxFile.textures.resize(textureSize);
 			auto& textures = pmxFile.textures;
+
+			auto modelDirectory = su::convertToWString(_modelDir);
 			for (size_t i{ 0 }; i < textureSize; ++i) {
-
 				auto texturePath = readString(ifs, header.byteType.encodeType);
-
+				
 				if (std::holds_alternative<std::string>(texturePath)) {
-					textures[i] = { _modelDir + std::get<std::string>(texturePath)};
+					textures[i] = { _modelDir + std::get<std::string>(texturePath) };
 				}
 
 				if (std::holds_alternative<std::wstring>(texturePath)) {
-					textures[i] = { convertWString(_modelDir) + std::get<std::wstring>(texturePath) };
+					textures[i] = { modelDirectory + std::get<std::wstring>(texturePath) };
 				}
 			}
 		}

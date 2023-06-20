@@ -3,12 +3,14 @@
 #include <string>
 #include <vector>
 #include <variant>
+#include <unordered_map>
+#include <memory>
+
+#include "PMX/PMXDataStruct.hpp"
 
 namespace model {
 
-	using VString = std::variant<std::string, std::wstring>;
-
-	// モデルを読み取った後の最終形態
+	// 描画用のモデルデータ
 	struct ModelData {
 	public:
 		struct ModelVertex {
@@ -17,17 +19,31 @@ namespace model {
 			float uv[2];
 		};
 
+		struct ModelMaterial {
+			float diffuse[4];
+			float specular[4];
+			float ambient[3];
+		};
+
 		struct Material {
-			VString textureName;
+			std::wstring materialName;
+			std::wstring textureName;
+			std::wstring sphereName;
+			pmx::SphereMode mode;
+			std::wstring toonName;
 			unsigned long vertCount;
+			ModelMaterial modelMaterial;
 		};
 
 	public:
-		VString extension;
-		VString modelName;
+		std::string extension;
+		std::wstring modelName;
 		std::vector<ModelVertex> vertexes;
 		std::vector<unsigned int> indexes;
 		std::vector<Material> materials;
 	};
 
 }
+
+using ModelDataPtr = std::shared_ptr<model::ModelData>;
+using ModelList = std::unordered_map<std::string, ModelDataPtr>;

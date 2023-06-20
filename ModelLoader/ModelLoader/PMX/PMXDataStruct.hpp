@@ -111,7 +111,6 @@ namespace model::pmx {
 		float edgeScale;
 	};
 
-
 	/// <summary>
 	/// çﬁéø
 	/// </summary>

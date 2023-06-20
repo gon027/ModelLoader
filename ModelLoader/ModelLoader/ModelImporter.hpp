@@ -5,6 +5,12 @@
 #include <memory>
 #include "ModelData.hpp"
 
+#ifdef DEF_SINGLETON
+
+#include <singletoh.h>
+
+#else
+
 template<class T>
 class Singleton {
 public:
@@ -25,13 +31,19 @@ private:
 	Singleton&& operator= (Singleton&&);
 };
 
-using ModelDataPtr = std::shared_ptr<model::ModelData>;
-using ModelList = std::unordered_map<std::string, ModelDataPtr>;
+#endif // DEF_SINGLETON
+
+struct ModelDesc {
+	std::string modelDirectoy;
+	std::string modelFileName;
+};
 
 class ModelImporter : public Singleton<ModelImporter> {
 	friend Singleton<ModelImporter>;
 
 public:
+	void loadModel(const std::string& _name, const ModelDesc& _modelDesc);
+
 	void loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);
 
 	ModelDataPtr getModelData(const std::string& _name);

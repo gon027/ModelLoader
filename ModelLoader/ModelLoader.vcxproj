@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -143,12 +143,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Test\main.cpp" />
     <ClCompile Include="ModelLoader\ModelImporter.cpp" />
     <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp" />
     <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp" />
+    <ClCompile Include="Test\Test_FBX.cpp" />
+    <ClCompile Include="Test\Test_PMX.cpp" />
+    <ClCompile Include="Test\Test_PMXLoader.cpp" />
+    <ClCompile Include="Test\Test_String.cpp" />
+    <ClCompile Include="Test\Test_StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ModelLoader\FBX\FBXLoader.hpp" />
     <ClInclude Include="ModelLoader\ModelData.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\ModelImporter.hpp" />
@@ -159,6 +165,7 @@
     <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXFile.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp" />
+    <ClInclude Include="ModelLoader\Utility\StringUtility.hpp" />
     <ClInclude Include="model_debugger.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

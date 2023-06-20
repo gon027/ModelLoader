@@ -18,7 +18,6 @@ namespace model::pmd {
 		if (!ifs) {
 			return false;
 		}
-
 		
 		{
 			ifs.read((char*)&pmdFile.header.name, sizeof(pmdFile.header.name));
