@@ -145,28 +145,65 @@ namespace model::pmx {
 	/// ボーン
 	/// </summary>
 	struct Bourne {
-		VString name;
-		VString eng;
+		VString bourneName;
+		VString bourneNameEnglish;
 
 		float position[3];
 		unsigned int parentBoneIndex;
 		int henkei;
 
-		int boneFlag;
+		short bourneFlag;
+
+		float positionOffset[3];
+
+		int accessPointIndex;
+
+		int grantBourneIndex;
+		float grantRate;
+
+		float axis[3];
+
+		float xAxis[3];
+		float zAxis[3];
+
+		int key;
+
+		int ikTargetBourneIndex;
+		int ikLoopCount;
+		float ikLoopRadian;
+		int ikLinkCount;
+		struct IKLink {
+			int ikLinkBourneIndex;
+			bool angleLimit;
+			float upperAngle[3];
+			float lowerAngle[3];
+		};
+		std::vector<IKLink> ikLinks;
+
 	};
 
 	/// <summary>
 	/// モーフ
 	/// </summary>
 	struct Morph {
+		VString morphName;
+		VString morphNameEnglish;
 
+		unsigned char controlPanel;
+
+		unsigned int morphOffset;
 	};
 
 	/// <summary>
 	/// 表示枠
 	/// </summary>
 	struct DisplayFrame {
+		VString wakumei;
+		VString wakumeie;
 
+		bool flag;
+
+		int a;
 	};
 
 	/// <summary>

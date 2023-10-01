@@ -54,6 +54,12 @@
     <ClCompile Include="Test\Test_StringUtil.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Test\PMX\Test_PMX_Bourne.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\FBX\Test_FBX2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelLoader\ModelLoader.hpp">

@@ -52,6 +52,24 @@ namespace model::pmx {
 			_ifs.read(reinterpret_cast<char*>(std::addressof(_data)), _streamsize);
 		}
 
+		constexpr short AccessPoint  = 0x0001;
+		constexpr short Rotateble    = 0x0002;
+		constexpr short Translatable = 0x0004;
+		constexpr short Display      = 0x0008;
+		constexpr short Controllable = 0x0010;
+
+		constexpr short IK = 0x0020;
+
+		constexpr short LocalGrant     = 0x0080;
+		constexpr short RotateGrant    = 0x0100;
+		constexpr short TranslateGrant = 0x0200;
+
+		constexpr short FixedAxis = 0x0400;
+		constexpr short LocalAxis = 0x0800;
+
+		constexpr short Physical = 0x1000;
+		constexpr short External = 0x2000;
+
 	}
 
 	PMXLoader::PMXLoader()
@@ -241,6 +259,83 @@ namespace model::pmx {
 
 			}
 		}
+
+		/*
+		// É{Å[Éì
+		{
+			int bourneSize;
+			readBinaryData(ifs, bourneSize);
+
+			pmxFile.bournes.resize(bourneSize);
+			auto& bournes = pmxFile.bournes;
+			for (size_t i{ 0 }; i < bourneSize; ++i) {
+				bournes[i].bourneName = readString(ifs, header.byteType.encodeType);
+				bournes[i].bourneNameEnglish = readString(ifs, header.byteType.encodeType);
+
+				readBinaryData(ifs, bournes[i].position);
+				readBinaryData(ifs, bournes[i].parentBoneIndex, header.byteType.morphIndex);
+				readBinaryData(ifs, bournes[i].henkei);
+
+				readBinaryData(ifs, bournes[i].bourneFlag);
+
+				auto bourneFlag = bournes[i].bourneFlag;
+				if (auto a = bourneFlag & AccessPoint) {
+					readBinaryData(ifs, bournes[i].accessPointIndex, header.byteType.morphIndex);
+				}
+				else {
+					readBinaryData(ifs, bournes[i].positionOffset);
+				}
+
+				if ((bourneFlag & Rotateble) || (bourneFlag & Translatable)) {
+					readBinaryData(ifs, bournes[i].grantBourneIndex, header.byteType.morphIndex);
+					readBinaryData(ifs, bournes[i].grantRate);
+				}
+
+				
+				// if (bourneFlag & Display) {
+				// 	readBinaryData(ifs, bournes[i].grantBourneIndex);
+				// }
+				// 
+				// if (bourneFlag & Controllable) {
+				// 	readBinaryData(ifs, bournes[i].grantBourneIndex);
+				// }
+				
+
+				if (bourneFlag & FixedAxis) {
+					readBinaryData(ifs, bournes[i].axis);
+				}
+
+				if (bourneFlag & LocalAxis) {
+					readBinaryData(ifs, bournes[i].xAxis);
+					readBinaryData(ifs, bournes[i].zAxis);
+				}
+
+				if (bourneFlag & External) {
+					readBinaryData(ifs, bournes[i].key);
+				}
+
+				if (bourneFlag & IK) {
+					readBinaryData(ifs, bournes[i].ikTargetBourneIndex, header.byteType.morphIndex);
+					readBinaryData(ifs, bournes[i].ikLoopCount);
+					readBinaryData(ifs, bournes[i].ikLoopRadian);
+
+					readBinaryData(ifs, bournes[i].ikLinkCount);
+
+					pmxFile.bournes[i].ikLinks.resize(bournes[i].ikLinkCount);
+					auto& ikLinks = pmxFile.bournes[i].ikLinks;
+					for (size_t _ik{ 0 }; _ik < bournes[i].ikLinkCount; ++i) {
+						readBinaryData(ifs, ikLinks[_ik].ikLinkBourneIndex);
+
+						readBinaryData(ifs, ikLinks[_ik].angleLimit);
+						if (!ikLinks[_ik].angleLimit) {
+							readBinaryData(ifs, ikLinks[_ik].upperAngle); 
+							readBinaryData(ifs, ikLinks[_ik].lowerAngle);
+						}
+					}
+				}
+			}
+		}
+		*/
 
 		return true;
 	}

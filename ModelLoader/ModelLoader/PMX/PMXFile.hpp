@@ -13,6 +13,7 @@ namespace model::pmx {
 		std::vector<unsigned int> indexes;
 		std::vector<VString> textures;
 		std::vector<Material> materials;
+		std::vector<Bourne> bournes;
 	};
 
 }
