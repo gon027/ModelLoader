@@ -6,6 +6,7 @@
 #include "PMD/PMDLoader.hpp"
 #include "PMX/PMXLoader.hpp"
 #include "Utility/StringUtility.hpp"
+#include "FBX/FBXLoader.hpp"
 
 #include <iostream>
 
@@ -171,6 +172,12 @@ void ModelImporter::loadModel(const std::string& _name, const std::string& _mode
 
 		modelList.emplace(_name, modelData);
 	}
+
+}
+
+void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDesc)
+{
+
 
 }
 

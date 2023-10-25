@@ -66,9 +66,6 @@
     <ClCompile Include="Test\FBX\Test_BinaryFile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Test\FBX\Test_Node2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ModelLoader\FBX\FBXLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

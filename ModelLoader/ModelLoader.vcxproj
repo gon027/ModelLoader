@@ -153,7 +153,6 @@
     <ClCompile Include="Test\FBX\Test_BinaryFile.cpp" />
     <ClCompile Include="Test\FBX\Test_FBX2.cpp" />
     <ClCompile Include="Test\FBX\Test_FBXLoader.cpp" />
-    <ClCompile Include="Test\FBX\Test_Node2.cpp" />
     <ClCompile Include="Test\main.cpp" />
     <ClCompile Include="ModelLoader\ModelImporter.cpp" />
     <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp" />

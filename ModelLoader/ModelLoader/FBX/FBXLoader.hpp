@@ -2,7 +2,6 @@
 
 #include <string>
 #include "FBXDataStruct.hpp"
-#include "../BinaryFile/BinaryFile.hpp"
 
 namespace model::fbx {
 
@@ -13,13 +12,13 @@ namespace model::fbx {
 
 		bool load(const std::string& _modelDir);
 
-	private:
+		inline std::shared_ptr<FBXNode> getNode() const {
+			return rootNode;
+		}
 
-
 	private:
-		BinaryFile bf;
 		long long version;
-
+		std::shared_ptr<FBXNode> rootNode;
 	};
 
 }

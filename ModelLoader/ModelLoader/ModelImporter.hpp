@@ -46,6 +46,12 @@ public:
 
 	void loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);
 
+	void loadPMX(const std::string& _name, const ModelDesc& _modelDesc);
+
+	void loadPMD(const std::string& _name, const ModelDesc& _modelDesc);
+
+	void loadFBX(const std::string& _name, const ModelDesc& _modelDesc);
+
 	ModelDataPtr getModelData(const std::string& _name);
 
 	ModelDataPtr getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);

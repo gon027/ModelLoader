@@ -16,6 +16,8 @@ namespace model::fbx {
 
 	void FBXProperty::setProperty(FBXPropertyType _type, FBXPropertyValue _value)
 	{
+		type = _type;
+		value = _value;
 	}
 
 	FBXNode::FBXNode()
