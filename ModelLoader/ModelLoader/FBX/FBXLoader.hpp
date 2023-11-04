@@ -17,6 +17,9 @@ namespace model::fbx {
 		}
 
 	private:
+		void createFbxScene();
+
+	private:
 		long long version;
 		std::shared_ptr<FBXNode> rootNode;
 	};

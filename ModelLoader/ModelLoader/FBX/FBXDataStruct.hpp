@@ -5,74 +5,9 @@
 #include <memory>
 #include <variant>
 
-/*
-  Header
-  GlobalSettings
-  Documents
-  References
-  Definitions
-  Objects
-  Connections
-  Takes
-*/
+#include "FBXProperty.hpp"
 
 namespace model::fbx {
-
-	enum class FBXPropertyType : char {
-		String    = 'S',
-		Int16     = 'Y',
-		Int32     = 'I',
-		Int64     = 'L',
-		Float     = 'F',
-		Double    = 'D',
-		Bool      = 'C',
-		VecUInt8  = 'R',
-		VecInt32  = 'i',
-		VecInt64  = 'l',
-		VecFloat  = 'f',
-		VecDouble = 'd',
-		VecBool   = 'b',
-	};
-
-	using FBXPropertyValue = std::variant<
-		std::string,
-		short,
-		int,
-		long long,
-		float,
-		double,
-		bool,
-		std::vector<int>,
-		std::vector<long long>,
-		std::vector<float>,
-		std::vector<double>,
-		std::vector<char>
-	>;
-
-	class FBXProperty {
-	public:
-		FBXProperty();
-		FBXProperty(FBXPropertyType _type, FBXPropertyValue _value);
-		~FBXProperty() = default;
-
-		void setProperty(FBXPropertyType _type, FBXPropertyValue _value);
-
-		void setType(FBXPropertyType _type) {
-			type = _type;
-		}
-
-		inline FBXPropertyType getType() const {
-			return type;
-		}
-
-		inline FBXPropertyValue getValue() const {
-			return value;
-		}
-
-	private:
-		FBXPropertyType type;
-		FBXPropertyValue value;
-	};
 
 	class FBXNode {
 	public:
@@ -90,7 +25,24 @@ namespace model::fbx {
 
 		// void setPerentNode(FBXPerentNode _perentNode);
 
-		void addPropertys(const FBXProperty& _property);
+		void addPropertys(FBXPropertyPtr _property);
+
+		FBXNodePtr findNode(const std::string _name);
+
+		FBXPropertyPtr findProperty(const std::string& _name);
+
+		template <class T>
+		T findPropertyValue(const std::string& _name) {
+			return dynamic_pointer_cast<T>(findProperty(_name));
+		}
+
+		FBXPropertyPtr findPropertyForChildren(const std::string& _name);
+		
+		template <class T>
+		T findPropertyValueForChildren(const std::string& _name) {
+			return dynamic_pointer_cast<T>(findPropertyForChildren(_name));
+		}
+
 
 		inline std::string getNodeName() const {
 			return name;
@@ -100,15 +52,80 @@ namespace model::fbx {
 			return children.size();
 		}
 
+		inline FBXNodePtr getChildNode(size_t _idx) const {
+			if (_idx < 0 || _idx >= children.size()) return nullptr;
+			return children[_idx];
+		}
+
 		inline size_t getPropertysSize() const {
 			return propertys.size();
 		}
 
+		inline FBXPropertyPtr getProperty(size_t _idx) const {
+			return propertys[_idx];
+		}
+
 	private:
-		std::string name;                    // ノード名
-		std::vector<FBXProperty> propertys;  // プロパティ
-		FBXPerentNode perendtNode;           // 親ノード
-		std::vector<FBXNodePtr> children;    // 子ノード
+		std::string name;                       // ノード名
+		std::vector<FBXPropertyPtr> propertys;  // プロパティ
+		FBXPerentNode perendtNode;              // 親ノード
+		std::vector<FBXNodePtr> children;       // 子ノード
 	};
 
+
+	/*
+	Mesh
+		Vertex
+		Index
+		UV
+		Normal
+	Material
+		Texture
+	*/
+
+
+
+	struct FbxGlobalSetting {
+		int upAxis;
+		int upAxisSing;
+		int frontAxis;
+		int frontAxisSign;
+		int coordAxis;
+		int coordAxisSign;
+		int originalUpAxis;
+		int originalUpAxisSign;
+		double unitScaleFactor;
+		double originalUnitScaleFactor;
+		float ambientColor[3];
+		std::string defaultCamera;
+		// timeMode;
+		// timeSpanStart;
+		// timeSpanStop;
+		double customFrameRate;
+	};
+
+	struct FbxGeometry {
+		std::vector<float> vertices;
+		std::vector<uint16_t> indexes;
+		std::vector<int> edges;
+	};
+
+	struct FbxMaterial {
+		float ambientColor[3];
+		float ambientFactor;
+		float diffuseColor[3];
+		double bumpFactor;
+		float specularColor[3];
+		float specularFactor;
+	};
+
+	struct FbxTexture {
+		std::string fileName;
+	};
+
+	struct FbxScene {
+		std::vector<FbxGeometry> geometries;
+		std::vector<FbxMaterial> materials;
+		std::vector<FbxTexture> textures;
+	};
 }

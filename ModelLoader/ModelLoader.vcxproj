@@ -40,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -122,6 +122,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\USER\source\repos\zlib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +139,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\USER\source\repos\zlib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,25 +150,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ModelLoader\BinaryFile\BinaryFile.cpp" />
-    <ClCompile Include="ModelLoader\FBX\FBXDataStruct.cpp" />
-    <ClCompile Include="ModelLoader\FBX\FBXLoader.cpp" />
-    <ClCompile Include="Test\FBX\Test_BinaryFile.cpp" />
-    <ClCompile Include="Test\FBX\Test_FBX2.cpp" />
-    <ClCompile Include="Test\FBX\Test_FBXLoader.cpp" />
-    <ClCompile Include="Test\main.cpp" />
+    <ClCompile Include="ModelLoader\FBX\src\FBXDataStruct.cpp" />
+    <ClCompile Include="ModelLoader\FBX\src\FBXLoader.cpp" />
     <ClCompile Include="ModelLoader\ModelImporter.cpp" />
     <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp" />
     <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp" />
-    <ClCompile Include="Test\PMX\Test_PMX_Bourne.cpp" />
-    <ClCompile Include="Test\Test_FBX.cpp" />
-    <ClCompile Include="Test\Test_PMX.cpp" />
-    <ClCompile Include="Test\Test_PMXLoader.cpp" />
-    <ClCompile Include="Test\Test_String.cpp" />
-    <ClCompile Include="Test\Test_StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelLoader\BinaryFile\BinaryFile.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXLoader.hpp" />
+    <ClInclude Include="ModelLoader\FBX\FBXProperty.hpp" />
     <ClInclude Include="ModelLoader\ModelData.hpp" />
     <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\ModelHeader.hpp" />
@@ -179,8 +172,6 @@
     <ClInclude Include="ModelLoader\PMX\PMXFile.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp" />
     <ClInclude Include="ModelLoader\Utility\StringUtility.hpp" />
-    <ClInclude Include="model_debugger.h" />
-    <ClInclude Include="Test\FBX\Test_Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\zlib\zlib\zlib.vcxproj">

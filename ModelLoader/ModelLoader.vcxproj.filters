@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test\main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp">
       <Filter>PMD</Filter>
     </ClCompile>
@@ -39,40 +36,13 @@
     <ClCompile Include="ModelLoader\ModelImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Test\Test_FBX.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\Test_PMX.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\Test_String.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\Test_PMXLoader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\Test_StringUtil.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\PMX\Test_PMX_Bourne.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\FBX\Test_FBX2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ModelLoader\BinaryFile\BinaryFile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Test\FBX\Test_BinaryFile.cpp">
+    <ClCompile Include="ModelLoader\FBX\src\FBXLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\FBX\FBXLoader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Test\FBX\Test_FBXLoader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelLoader\FBX\FBXDataStruct.cpp">
+    <ClCompile Include="ModelLoader\FBX\src\FBXDataStruct.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,9 +71,6 @@
     <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp">
       <Filter>PMX</Filter>
     </ClInclude>
-    <ClInclude Include="model_debugger.h">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="ModelLoader\ModelData.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -122,7 +89,7 @@
     <ClInclude Include="ModelLoader\BinaryFile\BinaryFile.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Test\FBX\Test_Node.cpp">
+    <ClInclude Include="ModelLoader\FBX\FBXProperty.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

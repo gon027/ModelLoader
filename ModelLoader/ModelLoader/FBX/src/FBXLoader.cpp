@@ -1,6 +1,6 @@
-#include "FBXLoader.hpp"
+#include "../FBXLoader.hpp"
 #include <zlib/zlib.h>
-#include "../BinaryFile/BinaryFile.hpp"
+#include "../../BinaryFile/BinaryFile.hpp"
 
 namespace model::fbx {
 
@@ -103,64 +103,72 @@ namespace model::fbx {
 
 			// 属性
 			for (long long i{ 0 }; i < attributeNum; ++i) {
-				FBXProperty property{};
-
 				char attribute{ _bf.read8() };
 				if (attribute == 'S' || attribute == 'R') {
 					long long _nodeNameTotalBytes{ _bf.read32() };
 					char _nodeName[256]{};
 					_bf.read((char*)&_nodeName, sizeof(char) * _nodeNameTotalBytes);
-					property.setProperty(FBXPropertyType::String, _nodeName);
+					FBXPropertyPtr property = std::make_shared<FBXStringProperty>(_nodeName);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'C') {
 					char value{ _bf.read8() };
-					property.setProperty(FBXPropertyType::Bool, value);
+					FBXPropertyPtr property = std::make_shared<FBXBoolProperty>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'Y') {
 					int value{ _bf.read16() };
-					property.setProperty(FBXPropertyType::Int16, value);
+					FBXPropertyPtr property = std::make_shared<FBXInt16Property>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'I') {
 					int value{ _bf.read32() };
-					property.setProperty(FBXPropertyType::Int32, value);
+					FBXPropertyPtr property = std::make_shared<FBXInt32Property>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'L') {
 					long long value{ _bf.read64() };
-					property.setProperty(FBXPropertyType::Int64, value);
+					FBXPropertyPtr property = std::make_shared<FBXInt64Property>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'F') {
 					float value{ _bf.readFloat() };
-					property.setProperty(FBXPropertyType::Float, value);
+					FBXPropertyPtr property = std::make_shared<FBXFloatProperty>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'D') {
 					double value{ _bf.readDouble() };
-					property.setProperty(FBXPropertyType::Double, value);
-				}
-				else if (attribute == 'd') { // vec<f64>
-					auto value = std::move(getArrayProperty<double>(_bf));
-					property.setProperty(FBXPropertyType::VecDouble, value);
-				}
-				else if (attribute == 'f') { // vec<f32>
-					auto value = std::move(getArrayProperty<float>(_bf));
-					property.setProperty(FBXPropertyType::VecFloat, value);
-				}
-				else if (attribute == 'l') { // vec<i64>
-					auto value = std::move(getArrayProperty<long long>(_bf));
-					property.setProperty(FBXPropertyType::VecInt64, value);
+					FBXPropertyPtr property = std::make_shared<FBXDoubleProperty>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'i') { // vec<i32>
 					auto value = std::move(getArrayProperty<int>(_bf));
-					property.setProperty(FBXPropertyType::VecInt32, value);
+					FBXPropertyPtr property = std::make_shared<FBXInt32ArrayProperty>(value);
+					object->addPropertys(property);
+				}
+				else if (attribute == 'l') { // vec<i64>
+					auto value = std::move(getArrayProperty<long long>(_bf));
+					FBXPropertyPtr property = std::make_shared<FBXInt64ArrayProperty>(value);
+					object->addPropertys(property);
+				}
+				else if (attribute == 'f') { // vec<f32>
+					auto value = std::move(getArrayProperty<float>(_bf));
+					FBXPropertyPtr property = std::make_shared<FBXFloatArrayProperty>(value);
+					object->addPropertys(property);
+				}
+				else if (attribute == 'd') { // vec<f64>
+					auto value = std::move(getArrayProperty<double>(_bf));
+					FBXPropertyPtr property = std::make_shared<FBXDoubleArrayProperty>(value);
+					object->addPropertys(property);
 				}
 				else if (attribute == 'b') { // vec<bool>
 					auto value = std::move(getArrayProperty<char>(_bf));
-					property.setProperty(FBXPropertyType::VecBool, value);
+					FBXPropertyPtr property = std::make_shared<FBXBoolArrayProperty>(value);
+					object->addPropertys(property);
 				}
 				else {
 					return nullptr;
 				}
-
-				object->addPropertys(property);
 			}
 
 			// 子ノードがあり、nullptrではなければ
@@ -207,14 +215,44 @@ namespace model::fbx {
 
         char magicNumber[32];
         bf.read(magicNumber, sizeof(char) * 23);
-        std::cout << "マジックナンバー : " << magicNumber << std::endl;
+        //std::cout << "マジックナンバー : " << magicNumber << std::endl;
 
         version = bf.read32();
-        std::cout << "バージョン : " << version << std::endl;
+        //std::cout << "バージョン : " << version << std::endl;
 
 		rootNode = parseBinaryFBX(bf, version);
+		if (!rootNode) return false;
 
-        return false;
+		createFbxScene();
+
+        return true;
     }
+
+	void FBXLoader::createFbxScene()
+	{
+		// GlobalSettingの取得
+		{
+			auto gSetting = rootNode->findNode("GlobalSettings")->findNode("Properties70");
+			if (!gSetting) {
+				return;
+			}
+
+			FbxGlobalSetting globalSettings{};
+			
+			// auto upAxis = gSetting->getChildNode(0)->findProperty("UpAxis");
+			// auto upAxis = gSetting->getChildNode(0)->findPropertyValue<FBXInt32Property>("UpAxis");
+			auto upAxis = gSetting->findPropertyValueForChildren<FBXInt32Property>("UpAxis");
+			// findpropertyallnode
+			/*globalSettings.upAxisSing = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("UpAxisSing"))->getValue();
+			globalSettings.frontAxis = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("FrontAxis"))->getValue();
+			globalSettings.frontAxisSign = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("FrontAxisSign"))->getValue();
+			globalSettings.coordAxis = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("CoordAxis"))->getValue();
+			globalSettings.coordAxisSign = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("CoordAxisSing"))->getValue();
+			*/
+
+			return;
+		}
+
+	}
 
 }
