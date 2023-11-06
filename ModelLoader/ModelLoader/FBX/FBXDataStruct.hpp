@@ -31,18 +31,7 @@ namespace model::fbx {
 
 		FBXPropertyPtr findProperty(const std::string& _name);
 
-		template <class T>
-		T findPropertyValue(const std::string& _name) {
-			return dynamic_pointer_cast<T>(findProperty(_name));
-		}
-
 		FBXPropertyPtr findPropertyForChildren(const std::string& _name);
-		
-		template <class T>
-		auto findPropertyValueForChildren(const std::string& _name) {
-			return dynamic_pointer_cast<T>(findPropertyForChildren(_name))->getValue();
-		}
-
 
 		inline std::string getNodeName() const {
 			return name;
@@ -82,8 +71,6 @@ namespace model::fbx {
 	Material
 		Texture
 	*/
-
-
 
 	struct FbxGlobalSetting {
 		int upAxis;

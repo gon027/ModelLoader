@@ -96,6 +96,10 @@ namespace model::fbx {
 
 	FBXPropertyPtr FBXNode::findProperty(const std::string& _name)
 	{
+		if (getPropertysSize() == 0) {
+			return nullptr;
+		}
+
 		auto prop = propertys[0];
 		if (!prop) {
 			return nullptr;
