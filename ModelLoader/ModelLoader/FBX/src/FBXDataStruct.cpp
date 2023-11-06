@@ -56,7 +56,7 @@ namespace model::fbx {
 		propertys.push_back(_property);
 	}
 
-	FBXNode::FBXNodePtr FBXNode::findNode(const std::string _name)
+	FBXNode::FBXNodePtr FBXNode::findNode(const std::string& _name)
 	{
 		for (auto& _node : children) {
 			auto node = internal::findChildNodeByName(_node, _name);
@@ -92,6 +92,17 @@ namespace model::fbx {
 		}
 
 		return nullptr;
+	}
+
+	std::vector<FBXNode::FBXNodePtr> FBXNode::findNodes(const std::string& _name)
+	{
+		std::vector<FBXNode::FBXNodePtr> result{};
+
+		for (auto& _node : children) {
+			if (_node->getNodeName() == _name) result.push_back(_node);
+		}
+
+		return result;
 	}
 
 	FBXPropertyPtr FBXNode::findProperty(const std::string& _name)

@@ -246,9 +246,15 @@ namespace model::fbx {
 			globalSettings.coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
 		}
 
-
+		// Objects
 		{
+			auto objects = rootNode->findNode("Objects");
+			
 
+			// Vertex
+			{
+				 
+			}
 		}
 	}
 

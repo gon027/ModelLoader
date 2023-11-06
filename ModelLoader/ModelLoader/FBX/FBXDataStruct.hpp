@@ -27,7 +27,9 @@ namespace model::fbx {
 
 		void addPropertys(FBXPropertyPtr _property);
 
-		FBXNodePtr findNode(const std::string _name);
+		FBXNodePtr findNode(const std::string& _name);
+
+		std::vector<FBXNodePtr> findNodes(const std::string& _name);
 
 		FBXPropertyPtr findProperty(const std::string& _name);
 
