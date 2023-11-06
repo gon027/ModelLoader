@@ -243,4 +243,56 @@ namespace model::fbx {
 
 	using FBXPropertyPtr = std::shared_ptr<IFBXProperty>;
 	using WeakFBXPropertyPtr = std::weak_ptr<IFBXProperty>;
+
+
+	template <class Value>
+	inline Value getPropertyValue(FBXPropertyPtr _ptr) {};
+
+	template <> inline std::string getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXStringProperty>(_ptr)->getValue();
+	}
+	
+	template <> inline short getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXInt16Property>(_ptr)->getValue();
+	}
+
+	template <> inline int getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXInt32Property>(_ptr)->getValue();
+	}
+
+	template <> inline long long getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXInt64Property>(_ptr)->getValue();
+	}
+
+	template <> inline float getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXFloatProperty>(_ptr)->getValue();
+	}
+
+	template <> inline double getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXDoubleProperty>(_ptr)->getValue();
+	}
+
+	template <> inline bool getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXBoolProperty>(_ptr)->getValue();
+	}
+
+	template <> inline std::vector<int>  getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXInt32ArrayProperty>(_ptr)->getValue();
+	}
+
+	template <> inline std::vector<long long>  getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXInt64ArrayProperty>(_ptr)->getValue();
+	}
+
+	template <> inline std::vector<float>  getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXFloatArrayProperty>(_ptr)->getValue();
+	}
+
+	template <> inline std::vector<double>  getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXDoubleArrayProperty>(_ptr)->getValue();
+	}
+
+	template <> inline std::vector<char>  getPropertyValue(FBXPropertyPtr _ptr) {
+		return std::dynamic_pointer_cast<FBXBoolArrayProperty>(_ptr)->getValue();
+	}
 }

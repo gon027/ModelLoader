@@ -39,8 +39,8 @@ namespace model::fbx {
 		FBXPropertyPtr findPropertyForChildren(const std::string& _name);
 		
 		template <class T>
-		T findPropertyValueForChildren(const std::string& _name) {
-			return dynamic_pointer_cast<T>(findPropertyForChildren(_name));
+		auto findPropertyValueForChildren(const std::string& _name) {
+			return dynamic_pointer_cast<T>(findPropertyForChildren(_name))->getValue();
 		}
 
 

@@ -238,21 +238,18 @@ namespace model::fbx {
 			}
 
 			FbxGlobalSetting globalSettings{};
-			
-			// auto upAxis = gSetting->getChildNode(0)->findProperty("UpAxis");
-			// auto upAxis = gSetting->getChildNode(0)->findPropertyValue<FBXInt32Property>("UpAxis");
-			auto upAxis = gSetting->findPropertyValueForChildren<FBXInt32Property>("UpAxis");
-			// findpropertyallnode
-			/*globalSettings.upAxisSing = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("UpAxisSing"))->getValue();
-			globalSettings.frontAxis = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("FrontAxis"))->getValue();
-			globalSettings.frontAxisSign = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("FrontAxisSign"))->getValue();
-			globalSettings.coordAxis = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("CoordAxis"))->getValue();
-			globalSettings.coordAxisSign = dynamic_pointer_cast<FBXInt32Property>(gSetting->findProperty("CoordAxisSing"))->getValue();
-			*/
-
-			return;
+			globalSettings.upAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxis"));
+			globalSettings.upAxisSing = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxisSign"));
+			globalSettings.frontAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxis"));
+			globalSettings.frontAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxisSign"));
+			globalSettings.coordAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxis"));
+			globalSettings.coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
 		}
 
+
+		{
+
+		}
 	}
 
 }
