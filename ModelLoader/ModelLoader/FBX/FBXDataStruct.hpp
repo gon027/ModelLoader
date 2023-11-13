@@ -74,7 +74,7 @@ namespace model::fbx {
 		Texture
 	*/
 
-	struct FbxGlobalSetting {
+	struct FBXGlobalSetting {
 		int upAxis;
 		int upAxisSing;
 		int frontAxis;
@@ -93,13 +93,15 @@ namespace model::fbx {
 		double customFrameRate;
 	};
 
-	struct FbxGeometry {
+	struct FBXGeometry {
 		std::vector<float> vertices;
 		std::vector<uint16_t> indexes;
 		std::vector<int> edges;
+		std::vector<float> normals;
+		std::vector<float> uvs;
 	};
 
-	struct FbxMaterial {
+	struct FBXMaterial {
 		float ambientColor[3];
 		float ambientFactor;
 		float diffuseColor[3];
@@ -108,13 +110,13 @@ namespace model::fbx {
 		float specularFactor;
 	};
 
-	struct FbxTexture {
+	struct FBXTexture {
 		std::string fileName;
 	};
 
-	struct FbxScene {
-		std::vector<FbxGeometry> geometries;
-		std::vector<FbxMaterial> materials;
-		std::vector<FbxTexture> textures;
+	struct FBXScene {
+		std::vector<std::shared_ptr<FBXGeometry>> geometries;
+		std::vector<std::shared_ptr<FBXMaterial>> materials;
+		std::vector<std::shared_ptr<FBXTexture>> textures;
 	};
 }

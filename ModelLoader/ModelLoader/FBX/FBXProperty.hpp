@@ -276,23 +276,23 @@ namespace model::fbx {
 		return std::dynamic_pointer_cast<FBXBoolProperty>(_ptr)->getValue();
 	}
 
-	template <> inline std::vector<int>  getPropertyValue(FBXPropertyPtr _ptr) {
+	template <> inline std::vector<int> getPropertyValue(FBXPropertyPtr _ptr) {
 		return std::dynamic_pointer_cast<FBXInt32ArrayProperty>(_ptr)->getValue();
 	}
 
-	template <> inline std::vector<long long>  getPropertyValue(FBXPropertyPtr _ptr) {
+	template <> inline std::vector<long long> getPropertyValue(FBXPropertyPtr _ptr) {
 		return std::dynamic_pointer_cast<FBXInt64ArrayProperty>(_ptr)->getValue();
 	}
 
-	template <> inline std::vector<float>  getPropertyValue(FBXPropertyPtr _ptr) {
+	template <> inline std::vector<float> getPropertyValue(FBXPropertyPtr _ptr) {
 		return std::dynamic_pointer_cast<FBXFloatArrayProperty>(_ptr)->getValue();
 	}
 
-	template <> inline std::vector<double>  getPropertyValue(FBXPropertyPtr _ptr) {
+	template <> inline std::vector<double> getPropertyValue(FBXPropertyPtr _ptr) {
 		return std::dynamic_pointer_cast<FBXDoubleArrayProperty>(_ptr)->getValue();
 	}
 
-	template <> inline std::vector<char>  getPropertyValue(FBXPropertyPtr _ptr) {
+	template <> inline std::vector<char> getPropertyValue(FBXPropertyPtr _ptr) {
 		return std::dynamic_pointer_cast<FBXBoolArrayProperty>(_ptr)->getValue();
 	}
 }

@@ -2,6 +2,8 @@
 #include <zlib/zlib.h>
 #include "../../BinaryFile/BinaryFile.hpp"
 
+#include <iostream>
+
 namespace model::fbx {
 
     namespace {
@@ -60,13 +62,11 @@ namespace model::fbx {
 				_bf.read((char*)val, sizeof(char) * byteLength);
 			}
 
-			const auto size = sizeof(T) * elems;
-			std::vector<T> val2{};
-			val2.resize(size);
-			memcpy_s(val2.data(), size, val, size);
-
+			T* cv = reinterpret_cast<T*>(val);
+			std::vector<T> result(cv, cv + elems);
 			delete[] val;
-			return val2;
+
+			return result;
 		}
 
         std::shared_ptr<FBXNode> readNode(BinaryFile& _bf, long long _version) {
@@ -198,6 +198,8 @@ namespace model::fbx {
 
     FBXLoader::FBXLoader()
         : version{}
+		, globalSetting{ new FBXGlobalSetting{} }
+		, fbxGeometrys{}
     {
     }
 
@@ -237,25 +239,194 @@ namespace model::fbx {
 				return;
 			}
 
-			FbxGlobalSetting globalSettings{};
-			globalSettings.upAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxis"));
-			globalSettings.upAxisSing = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxisSign"));
-			globalSettings.frontAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxis"));
-			globalSettings.frontAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxisSign"));
-			globalSettings.coordAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxis"));
-			globalSettings.coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
+			// FBXGlobalSetting globalSettings{};
+			globalSetting->upAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxis"));
+			globalSetting->upAxisSing = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxisSign"));
+			globalSetting->frontAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxis"));
+			globalSetting->frontAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxisSign"));
+			globalSetting->coordAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxis"));
+			globalSetting->coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
 		}
 
-		// Objects
-		{
-			auto objects = rootNode->findNode("Objects");
-			
+		fbxGeometrys = std::move(createFBXGeometry());
+	}
 
-			// Vertex
-			{
-				 
+	std::vector<std::shared_ptr<FBXGeometry>> FBXLoader::createFBXGeometry()
+	{
+		std::vector<std::shared_ptr<FBXGeometry>> result{};
+
+		auto objects = rootNode->findNode("Objects");
+		auto geometrys = objects->findNodes("Geometry");
+		if (geometrys.size() == 0) {
+			return {};
+		}
+
+		auto coordAxis = globalSetting->coordAxis;
+		auto upAxis = globalSetting->upAxis;
+		auto frontAxis = globalSetting->frontAxis;
+
+		// Vertex
+		std::vector<std::vector<float>> verteies{};
+		{
+			for (auto& geometry : geometrys) {
+				// Todo: PropertyがShapeの時はスキップする
+				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				if (propertyName != "Mesh") continue;
+				
+				auto vertexProp = geometry->findNode("Vertices")->getProperty(0);
+				auto vertex = getPropertyValue<std::vector<double>>(vertexProp);
+				
+				// Todo: FBXの配列を変換する
+				std::vector<float> resVertex(vertex.size());
+				for (size_t idx{ 0 }; idx < vertex.size(); idx += 3) {
+					resVertex[idx + 0] = static_cast<float>(vertex[idx + coordAxis]);
+					resVertex[idx + 1] = static_cast<float>(vertex[idx + upAxis]);
+					resVertex[idx + 2] = static_cast<float>(vertex[idx + frontAxis]);
+				}
+
+				verteies.push_back(resVertex);
 			}
 		}
+
+		// Index
+		std::vector<std::vector<uint16_t>> indeies{};
+		{
+			for (auto& geometry : geometrys) {
+				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				if (propertyName != "Mesh") continue;
+
+				bool isPloygonVertexIndex = true;
+
+				auto indexProp = geometry->findNode("PolygonVertexIndex");
+				if (!indexProp) {
+					isPloygonVertexIndex = false;
+					indexProp = geometry->findNode("Indexes");
+					if (!indexProp) {
+						return {};
+					}
+				}
+
+				std::vector<uint16_t> tmpIndex{};
+				size_t tmpIndexSize{ 0 };
+				size_t currentTmpIndexPosition{ 0 };
+				auto index = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
+				if (isPloygonVertexIndex) {
+
+					size_t idx{ 0 };
+					while (idx < index.size()) {
+
+						size_t offset{ idx };
+						size_t countToNegativeIndex{ 0 };
+						while (!(index[offset] < 0)) {
+							++countToNegativeIndex;
+							++offset;
+						}
+						++countToNegativeIndex;
+
+						if (countToNegativeIndex == 3) {
+							tmpIndexSize += 3;
+							tmpIndex.resize(tmpIndexSize);
+
+							for (size_t i{ 0 }; i < 3; ++i) {
+								const size_t currentIdx = idx + i;
+								tmpIndex[currentTmpIndexPosition] = index[currentIdx];
+								if (index[currentIdx] < 0) {
+									uint16_t pulsIndex = ~index[currentIdx];
+									tmpIndex[currentTmpIndexPosition] = pulsIndex;
+								}
+								++currentTmpIndexPosition;
+							}
+							idx += 3;
+						}
+						else {
+							tmpIndexSize += 6;
+							tmpIndex.resize(tmpIndexSize);
+
+							for (size_t i{ 0 }; i < 4; ++i) {
+								const size_t currentIdx = idx + i;
+								tmpIndex[currentTmpIndexPosition] = index[currentIdx];
+
+								if (index[currentIdx] < 0) {
+									uint16_t pulsIndex = ~index[currentIdx];
+
+									tmpIndex[currentTmpIndexPosition + 0] = tmpIndex[currentTmpIndexPosition - 3];
+									tmpIndex[currentTmpIndexPosition + 1] = tmpIndex[currentTmpIndexPosition - 1];
+									tmpIndex[currentTmpIndexPosition + 2] = pulsIndex;
+
+									currentTmpIndexPosition += 3;
+									idx += 4;
+									break;
+								}
+								++currentTmpIndexPosition;
+							}
+						}
+						
+					}
+				}
+				else {
+					tmpIndex.resize(index.size());
+					std::copy(index.begin(), index.end(), tmpIndex.begin());
+				}
+
+				indeies.push_back(tmpIndex);
+			}
+		}
+
+		// normals
+		std::vector<std::vector<float>> normals{};
+		{
+			for (auto& geometry : geometrys) {
+				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				if (propertyName != "Mesh") continue;
+
+				auto layerElementNormalProp = geometry->findNode("LayerElementNormal");
+
+				std::vector<double> normalsVec{};
+				if (layerElementNormalProp)
+				{
+					auto mappingInfomationTypeProp = layerElementNormalProp->findNode("MappingInformationType");
+					if (!mappingInfomationTypeProp) return {};
+					auto mappingInfomationType = getPropertyValue<std::string>(mappingInfomationTypeProp->getProperty(0));
+
+					auto referenceInformationTypeProp = layerElementNormalProp->findNode("ReferenceInformationType");
+					if (!referenceInformationTypeProp) return {};
+					auto referenceInformationType = getPropertyValue<std::string>(referenceInformationTypeProp->getProperty(0));
+
+					auto normalsProp = layerElementNormalProp->findNode("Normals");
+					if (!normalsProp) return {};
+					normalsVec = std::move(getPropertyValue<std::vector<double>>(normalsProp->getProperty(0)));
+				}
+				else {
+					auto normalsProp = geometry->findNode("Normals");
+					if (!normalsProp) return {};
+					normalsVec = std::move(getPropertyValue<std::vector<double>>(normalsProp->getProperty(0)));
+				}
+
+				const auto normalsSize = normalsVec.size();
+				std::vector<float> retNormals(normalsSize);
+				for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
+					retNormals[idx + coordAxis] = static_cast<float>(normalsVec[idx + coordAxis]);
+					retNormals[idx + upAxis] = static_cast<float>(normalsVec[idx + upAxis]);
+					retNormals[idx + frontAxis] = static_cast<float>(normalsVec[idx + frontAxis]);
+				}
+
+				normals.push_back(retNormals);
+			}
+		}
+
+		size_t size = verteies.size();
+		for (size_t idx{ 0 }; idx < size; ++idx) {
+			std::shared_ptr<FBXGeometry> geometry{ new FBXGeometry{} };
+			geometry->vertices = std::move(verteies[idx]);
+			geometry->indexes = std::move(indeies[idx]);
+			geometry->normals = std::move(normals[idx]);
+			result.push_back(geometry);
+		}
+
+		return result;
 	}
 
 }

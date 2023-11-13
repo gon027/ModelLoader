@@ -16,12 +16,24 @@ namespace model::fbx {
 			return rootNode;
 		}
 
-	private:
+		inline std::vector<std::shared_ptr<FBXGeometry>>& getFBXGeometrys() {
+			return fbxGeometrys;
+		}
+
+	// private:
+	public: // Todo: 単体テストのため、一時的にpublic
 		void createFbxScene();
+
+		// std::shared_ptr<FBXGlobalSetting> createFBXGlobalSetting();
+
+		std::vector<std::shared_ptr<FBXGeometry>> createFBXGeometry();
 
 	private:
 		long long version;
 		std::shared_ptr<FBXNode> rootNode;
+		
+		std::shared_ptr<FBXGlobalSetting> globalSetting;
+		std::vector<std::shared_ptr<FBXGeometry>> fbxGeometrys;
 	};
 
 }

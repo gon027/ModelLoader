@@ -177,8 +177,49 @@ void ModelImporter::loadModel(const std::string& _name, const std::string& _mode
 
 void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDesc)
 {
+	model::fbx::FBXLoader fbxLoader{};
+	if (!fbxLoader.load(_modelDesc.modelFileName)) {
+		return;
+	}
+	ModelDataPtr modelData{ new model::ModelData{} };
 
+	auto& fbxGeometrys = fbxLoader.getFBXGeometrys();
+	modelData->materials.resize(fbxGeometrys.size());
 
+	size_t idx{ 0 };
+	for (auto& geometry : fbxGeometrys) {
+		// vertex
+		{
+			size_t prevVertexSize = modelData->vertexes.size();
+			size_t vertexSize = geometry->vertices.size() / 3;
+			size_t vertexAllSize = prevVertexSize + vertexSize;
+			modelData->vertexes.resize(vertexAllSize);
+
+			size_t vertexIdx{ prevVertexSize };
+			for (size_t idx{ 0 }; idx < geometry->vertices.size(); idx += 3) {
+				modelData->vertexes[vertexIdx].position[0] = geometry->vertices[idx + 0];
+				modelData->vertexes[vertexIdx].position[1] = geometry->vertices[idx + 1];
+				modelData->vertexes[vertexIdx].position[2] = geometry->vertices[idx + 2];
+				++vertexIdx;
+			}
+		}
+
+		// index
+		{
+			size_t prevIndexSize = modelData->indexes.size();
+			size_t indexSize = geometry->indexes.size();
+			size_t indexAllSize = indexSize + prevIndexSize;
+
+			modelData->indexes.resize(indexAllSize);
+			std::copy(geometry->indexes.begin(), geometry->indexes.end(), modelData->indexes.begin() + prevIndexSize);
+
+			// material
+			modelData->materials[idx].vertCount = static_cast<unsigned long>(indexSize);
+		}
+
+		++idx;
+	}
+	modelList.emplace(_name, modelData);
 }
 
 ModelDataPtr ModelImporter::getModelData(const std::string& _name)
