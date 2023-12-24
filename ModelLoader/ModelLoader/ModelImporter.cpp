@@ -7,8 +7,11 @@
 #include "PMX/PMXLoader.hpp"
 #include "Utility/StringUtility.hpp"
 #include "FBX/FBXLoader.hpp"
+#include "Vertex/Vertex.hpp"
 
 #include <iostream>
+#include <ios>     // std::left, std::right
+#include <iomanip>
 
 namespace {
 
@@ -19,6 +22,8 @@ namespace {
 		_modelData->modelName = util::getWString(_pmdFile.header.modelName);
 		util::rep(_modelData->modelName, L"\\", L"/");
 
+		// クラスの変更のため、一時的コメントアウト
+		/*
 		{
 			size_t vertexSize = _pmdFile.vertexes.size();
 			_modelData->vertexes.resize(vertexSize);
@@ -59,6 +64,7 @@ namespace {
 				_modelData->materials[i].vertCount = _pmdFile.materials[i].faceVertCount;
 			}
 		}
+		*/
 	}
 
 	// PMXの形式からModelDataの形式に変換
@@ -66,6 +72,8 @@ namespace {
 		_modelData->extension = "pmx";
 		_modelData->modelName = util::getWString(_pmxFile.modelInfo.modelName);
 
+		// クラスの変更のため、一時的コメントアウト
+		/*
 		{
 			size_t vertexSize = _pmxFile.vertexes.size();
 			_modelData->vertexes.resize(vertexSize);
@@ -136,6 +144,7 @@ namespace {
 				}
 			}
 		}
+		*/
 	}
 }
 
@@ -175,6 +184,15 @@ void ModelImporter::loadModel(const std::string& _name, const std::string& _mode
 
 }
 
+float clamp(float _val, float _min, float _max) {
+	return std::max(std::min(_val, _max), _min);
+}
+
+float comv(float _val) {
+	if (_val < 0) return _val * -1;
+	return _val;
+}
+
 void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDesc)
 {
 	model::fbx::FBXLoader fbxLoader{};
@@ -185,39 +203,61 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 
 	auto& fbxGeometrys = fbxLoader.getFBXGeometrys();
 	modelData->materials.resize(fbxGeometrys.size());
+	size_t prevIndexBeginCount = 0;
 
 	size_t idx{ 0 };
 	for (auto& geometry : fbxGeometrys) {
-		// vertex
-		{
-			size_t prevVertexSize = modelData->vertexes.size();
-			size_t vertexSize = geometry->vertices.size() / 3;
-			size_t vertexAllSize = prevVertexSize + vertexSize;
-			modelData->vertexes.resize(vertexAllSize);
 
-			size_t vertexIdx{ prevVertexSize };
-			for (size_t idx{ 0 }; idx < geometry->vertices.size(); idx += 3) {
-				modelData->vertexes[vertexIdx].position[0] = geometry->vertices[idx + 0];
-				modelData->vertexes[vertexIdx].position[1] = geometry->vertices[idx + 1];
-				modelData->vertexes[vertexIdx].position[2] = geometry->vertices[idx + 2];
-				++vertexIdx;
-			}
+		// vertex
+		size_t vertexSize = geometry->vertices.size();
+		std::vector<model::ModelVertex> modelVertex(vertexSize);
+		for (size_t i{ 0 }; i < geometry->vertices.size(); ++i) {
+			modelVertex[i].position = geometry->vertices[i];
 		}
 
 		// index
-		{
-			size_t prevIndexSize = modelData->indexes.size();
-			size_t indexSize = geometry->indexes.size();
-			size_t indexAllSize = indexSize + prevIndexSize;
+		size_t indexSize = geometry->indexes.size();
+		std::vector<unsigned int> modelIndex(indexSize);
+		std::copy(geometry->indexes.begin(), geometry->indexes.end(), modelIndex.begin());
+		modelData->indexes.push_back(modelIndex);
 
-			modelData->indexes.resize(indexAllSize);
-			std::copy(geometry->indexes.begin(), geometry->indexes.end(), modelData->indexes.begin() + prevIndexSize);
+		// material
+		modelData->materials[idx].vertCount = static_cast<unsigned long>(indexSize);
 
-			// material
-			modelData->materials[idx].vertCount = static_cast<unsigned long>(indexSize);
+		// normal
+		std::vector <model::Vertex3> nols{};
+		size_t normalsSize = geometry->normals.size();
+		for (size_t i{ 0 }; i < normalsSize; ++i) {
+			nols.push_back(geometry->normals[i]);
+
+			/*
+			std::cout
+				<< i / 3 << " = "
+				<< "{ x: " << geometry->normals[i].x
+				<< ", y: " << geometry->normals[i].y
+				<< ", z: " << geometry->normals[i].z
+				<< " }" << std::endl;
+				*/
+		}
+			
+		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
+			auto& vNormal = modelVertex[geometry->indexes[i]].normal;
+			vNormal = nols[geometry->indexes[i]];
+
+			/*
+			std::cout
+				<< "index[ " 
+				<< geometry->indexes[i] << " ] = "
+				<< "{ x: " << vNormal.x
+				<< ", y: " << vNormal.y
+				<< ", z: " << vNormal.z
+				<< " }" << std::endl;
+				*/
 		}
 
 		++idx;
+
+		modelData->vertexes.push_back(modelVertex);
 	}
 	modelList.emplace(_name, modelData);
 }

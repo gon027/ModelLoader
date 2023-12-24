@@ -7,18 +7,20 @@
 #include <memory>
 
 #include "PMX/PMXDataStruct.hpp"
+#include "Vertex/Vertex.hpp"
 
 namespace model {
+
+	struct ModelVertex {
+		Vertex3 position;
+		Vertex3 normal;
+		Vertex2 uv;
+	};
 
 	// 描画用のモデルデータ
 	struct ModelData {
 	public:
-		struct ModelVertex {
-			float position[3];
-			float normal[3];
-			float uv[2];
-		};
-
+		
 		struct ModelMaterial {
 			float diffuse[4];
 			float specular[4];
@@ -38,8 +40,8 @@ namespace model {
 	public:
 		std::string extension;
 		std::wstring modelName;
-		std::vector<ModelVertex> vertexes;
-		std::vector<unsigned int> indexes;
+		std::vector<std::vector<ModelVertex>> vertexes;
+		std::vector<std::vector<unsigned int>> indexes;
 		std::vector<Material> materials;
 	};
 

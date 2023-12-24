@@ -172,6 +172,7 @@
     <ClInclude Include="ModelLoader\PMX\PMXFile.hpp" />
     <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp" />
     <ClInclude Include="ModelLoader\Utility\StringUtility.hpp" />
+    <ClInclude Include="ModelLoader\Vertex\Vertex.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\zlib\zlib\zlib.vcxproj">

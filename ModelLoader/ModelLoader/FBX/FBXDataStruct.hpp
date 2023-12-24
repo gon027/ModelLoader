@@ -5,6 +5,7 @@
 #include <memory>
 #include <variant>
 
+#include "../Vertex/Vertex.hpp"
 #include "FBXProperty.hpp"
 
 namespace model::fbx {
@@ -94,11 +95,11 @@ namespace model::fbx {
 	};
 
 	struct FBXGeometry {
-		std::vector<float> vertices;
+		std::vector<Vertex3> vertices;
 		std::vector<uint16_t> indexes;
 		std::vector<int> edges;
-		std::vector<float> normals;
-		std::vector<float> uvs;
+		std::vector<Vertex3> normals;
+		std::vector<Vertex2> uvs;
 	};
 
 	struct FBXMaterial {

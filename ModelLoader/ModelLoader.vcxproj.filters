@@ -92,5 +92,8 @@
     <ClInclude Include="ModelLoader\FBX\FBXProperty.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="ModelLoader\Vertex\Vertex.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
