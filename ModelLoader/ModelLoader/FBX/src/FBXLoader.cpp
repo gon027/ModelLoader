@@ -1,7 +1,7 @@
 #include "../FBXLoader.hpp"
 #include <zlib/zlib.h>
 #include "../../BinaryFile/BinaryFile.hpp"
-
+#include <Windows.h>
 #include <iostream>
 
 namespace model::fbx {
@@ -69,6 +69,9 @@ namespace model::fbx {
 			return result;
 		}
 
+		
+
+		int cnt = 0;
 		std::shared_ptr<FBXNode> readNode(BinaryFile& _bf, long long _version) {
 			long long dist{ 0 };
 			long long attributeNum{ 0 };
@@ -93,6 +96,7 @@ namespace model::fbx {
 			if (dist == 0 && attributeNum == 0 && attributeTotalBytes == 0 && nodeNameTotalBytes == 0) {
 				return nullptr;
 			}
+
 
 			// ノード名
 			char nodeName[64]{};
@@ -167,13 +171,23 @@ namespace model::fbx {
 					object->addPropertys(property);
 				}
 				else {
+					std::cout << 3 << std::endl;
 					return nullptr;
 				}
 			}
 
 			// 子ノードがあり、nullptrではなければ
 			while (_bf.getPosition() < dist) {
+				cnt++;
+				std::string a{ 
+					"position = " + std::to_string(_bf.getPosition()) 
+					+ ", dist = " + std::to_string(dist) 
+					+ ", nodeName = " + std::string{ nodeName }
+				};
+				// std::cout << a << std::endl;
+				// OutputDebugString(a.c_str());
 				auto child = readNode(_bf, _version);
+				cnt--;
 				if (child) {
 					object->addNode(child);
 				}
@@ -265,16 +279,25 @@ namespace model::fbx {
 		auto upAxis = globalSetting->upAxis;
 		auto frontAxis = globalSetting->frontAxis;
 
+		std::vector<model::fbx::FBXNode::FBXNodePtr> meshes{};
+		for (auto& geometry : geometrys) {
+			auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+			auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+			if (propertyName == "Mesh") {
+				meshes.emplace_back(geometry);
+			}
+		}
+
 		// Vertex
 		std::vector<std::vector<Vertex3>> verteies{};
 		{
-			for (auto& geometry : geometrys) {
+			for (auto& mesh : meshes) {
 				// Todo: PropertyがShapeの時はスキップする
-				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				if (propertyName != "Mesh") continue;
+				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				// if (propertyName != "Mesh") continue;
 
-				auto vertexProp = geometry->findNode("Vertices")->getProperty(0);
+				auto vertexProp = mesh->findNode("Vertices")->getProperty(0);
 				auto vertex = getPropertyValue<std::vector<double>>(vertexProp);
 
 				// Todo: FBXの配列を変換する
@@ -293,17 +316,18 @@ namespace model::fbx {
 		// Index
 		std::vector<std::vector<uint16_t>> indeies{};
 		{
-			for (auto& geometry : geometrys) {
-				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				if (propertyName != "Mesh") continue;
+			int ccc{ 0 };
+			for (auto& mesh : meshes) {
+				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				// if (propertyName != "Mesh") continue;
 
 				bool isPloygonVertexIndex = true;
 
-				auto indexProp = geometry->findNode("PolygonVertexIndex");
+				auto indexProp = mesh->findNode("PolygonVertexIndex");
 				if (!indexProp) {
 					isPloygonVertexIndex = false;
-					indexProp = geometry->findNode("Indexes");
+					indexProp = mesh->findNode("Indexes");
 					if (!indexProp) {
 						return {};
 					}
@@ -314,10 +338,9 @@ namespace model::fbx {
 				size_t currentTmpIndexPosition{ 0 };
 				auto index = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
 				if (isPloygonVertexIndex) {
-
+					
 					size_t idx{ 0 };
 					while (idx < index.size()) {
-
 						size_t offset{ idx };
 						size_t countToNegativeIndex{ 0 };
 						while (!(index[offset] < 0)) {
@@ -342,9 +365,40 @@ namespace model::fbx {
 							idx += 3;
 						}
 						else {
-							tmpIndexSize += 6;
+							// tmpIndexSize += 6;
+							tmpIndexSize += 3 * (countToNegativeIndex - 2);
 							tmpIndex.resize(tmpIndexSize);
 
+							for (size_t i{ 0 }; i < 3; ++i) {
+								const size_t currentIdx = idx + i;
+								tmpIndex[currentTmpIndexPosition] = index[currentIdx];
+								++currentTmpIndexPosition;
+							}
+							idx += 3;
+
+							// 5 .. 2
+							const size_t loopCount = (countToNegativeIndex - 2) - 1;
+							for (size_t i{ 0 }; i < loopCount; ++i) {
+								const size_t currentIdx = idx + i;
+
+								tmpIndex[currentTmpIndexPosition + 0] = tmpIndex[currentTmpIndexPosition - 3];
+								tmpIndex[currentTmpIndexPosition + 1] = tmpIndex[currentTmpIndexPosition - 1];
+								// tmpIndex[currentTmpIndexPosition + 2] = index[currentIdx];
+
+								if (index[currentIdx] < 0) {
+									uint16_t pulsIndex = ~index[currentIdx];
+									tmpIndex[currentTmpIndexPosition + 2] = pulsIndex;
+								}
+								else {
+									tmpIndex[currentTmpIndexPosition + 2] = index[currentIdx];
+								}
+								currentTmpIndexPosition += 3;
+							}
+
+							// idx += countToNegativeIndex;
+							idx += loopCount;
+
+							/*
 							for (size_t i{ 0 }; i < 4; ++i) {
 								const size_t currentIdx = idx + i;
 								tmpIndex[currentTmpIndexPosition] = index[currentIdx];
@@ -362,14 +416,15 @@ namespace model::fbx {
 								}
 								++currentTmpIndexPosition;
 							}
+							*/
 						}
-
 					}
 				}
 				else {
 					tmpIndex.resize(index.size());
 					std::copy(index.begin(), index.end(), tmpIndex.begin());
 				}
+						ccc++;
 
 				indeies.push_back(tmpIndex);
 			}
@@ -378,12 +433,12 @@ namespace model::fbx {
 		// normals
 		std::vector<std::vector<Vertex3>> normals{};
 		{
-			for (auto& geometry : geometrys) {
-				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				if (propertyName != "Mesh") continue;
+			for (auto& mesh : meshes) {
+				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				// if (propertyName != "Mesh") continue;
 
-				auto layerElementNormalProp = geometry->findNode("LayerElementNormal");
+				auto layerElementNormalProp = mesh->findNode("LayerElementNormal");
 
 				auto mappingInfomationTypeProp = layerElementNormalProp->findNode("MappingInformationType");
 				if (!mappingInfomationTypeProp) continue;
@@ -404,9 +459,9 @@ namespace model::fbx {
 						std::vector<Vertex3> retNormals(normalsSize / 3);
 						for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
 							const size_t resultNormalIdx{ idx / 3 };
-							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + 0]);
-							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + 1]);
-							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + 2]);
+							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
+							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
+							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
 						}
 						normals.push_back(retNormals);
 					}
@@ -420,9 +475,9 @@ namespace model::fbx {
 						std::vector<Vertex3> retNormals(normalsSize / 3);
 						for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
 							const size_t resultNormalIdx{ idx / 3 };
-							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + 0]);
-							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + 1]);
-							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + 2]);
+							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
+							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
+							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
 						}
 						normals.push_back(retNormals);
 					}
@@ -436,12 +491,12 @@ namespace model::fbx {
 		// uvs
 		std::vector<std::vector<Vertex2>> uvs{};
 		{
-			for (auto& geometry : geometrys) {
-				auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				if (propertyName != "Mesh") continue;
+			for (auto& mesh : meshes) {
+				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+				// if (propertyName != "Mesh") continue;
 
-				auto layerElementUVNodes = geometry->findNodes("LayerElementUV");
+				auto layerElementUVNodes = mesh->findNodes("LayerElementUV");
 				if (layerElementUVNodes.size() != 0) continue;
 
 				for (auto& layerElementUvNode : layerElementUVNodes) {
