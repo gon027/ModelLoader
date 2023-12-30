@@ -1,8 +1,9 @@
 #include "../FBXLoader.hpp"
 #include <zlib/zlib.h>
 #include "../../BinaryFile/BinaryFile.hpp"
-#include <Windows.h>
-#include <iostream>
+
+// #include <Windows.h>
+// #include <iostream>
 
 namespace model::fbx {
 
@@ -171,7 +172,6 @@ namespace model::fbx {
 					object->addPropertys(property);
 				}
 				else {
-					std::cout << 3 << std::endl;
 					return nullptr;
 				}
 			}
@@ -275,9 +275,13 @@ namespace model::fbx {
 			return result;
 		}
 
-		auto coordAxis = globalSetting->coordAxis;
-		auto upAxis = globalSetting->upAxis;
-		auto frontAxis = globalSetting->frontAxis;
+		const auto coordAxis = globalSetting->coordAxis;
+		const auto upAxis = globalSetting->upAxis;
+		const auto frontAxis = globalSetting->frontAxis;
+
+		const auto coordAxisSign = globalSetting->coordAxisSign;
+		const auto upAxisSign = globalSetting->upAxisSing;
+		const auto frontAxisSign = globalSetting->frontAxisSign;
 
 		std::vector<model::fbx::FBXNode::FBXNodePtr> meshes{};
 		for (auto& geometry : geometrys) {
@@ -292,11 +296,6 @@ namespace model::fbx {
 		std::vector<std::vector<Vertex3>> verteies{};
 		{
 			for (auto& mesh : meshes) {
-				// Todo: PropertyがShapeの時はスキップする
-				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				// if (propertyName != "Mesh") continue;
-
 				auto vertexProp = mesh->findNode("Vertices")->getProperty(0);
 				auto vertex = getPropertyValue<std::vector<double>>(vertexProp);
 
@@ -304,9 +303,9 @@ namespace model::fbx {
 				std::vector<Vertex3> retVertex(vertex.size() / 3);
 				for (size_t idx{ 0 }; idx < vertex.size(); idx += 3) {
 					const size_t reslutVertexIdx{ idx / 3 };
-					retVertex[reslutVertexIdx].x = static_cast<float>(vertex[idx + coordAxis]);
-					retVertex[reslutVertexIdx].y = static_cast<float>(vertex[idx + upAxis]);
-					retVertex[reslutVertexIdx].z = static_cast<float>(vertex[idx + frontAxis]);
+					retVertex[reslutVertexIdx].x = static_cast<float>(coordAxisSign * vertex[idx + coordAxis]);
+					retVertex[reslutVertexIdx].y = static_cast<float>(upAxisSign * vertex[idx + upAxis]);
+					retVertex[reslutVertexIdx].z = static_cast<float>(frontAxisSign * vertex[idx + frontAxis]);
 				}
 
 				verteies.push_back(retVertex);
@@ -318,10 +317,6 @@ namespace model::fbx {
 		{
 			int ccc{ 0 };
 			for (auto& mesh : meshes) {
-				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				// if (propertyName != "Mesh") continue;
-
 				bool isPloygonVertexIndex = true;
 
 				auto indexProp = mesh->findNode("PolygonVertexIndex");
@@ -365,7 +360,6 @@ namespace model::fbx {
 							idx += 3;
 						}
 						else {
-							// tmpIndexSize += 6;
 							tmpIndexSize += 3 * (countToNegativeIndex - 2);
 							tmpIndex.resize(tmpIndexSize);
 
@@ -383,7 +377,6 @@ namespace model::fbx {
 
 								tmpIndex[currentTmpIndexPosition + 0] = tmpIndex[currentTmpIndexPosition - 3];
 								tmpIndex[currentTmpIndexPosition + 1] = tmpIndex[currentTmpIndexPosition - 1];
-								// tmpIndex[currentTmpIndexPosition + 2] = index[currentIdx];
 
 								if (index[currentIdx] < 0) {
 									uint16_t pulsIndex = ~index[currentIdx];
@@ -395,28 +388,7 @@ namespace model::fbx {
 								currentTmpIndexPosition += 3;
 							}
 
-							// idx += countToNegativeIndex;
 							idx += loopCount;
-
-							/*
-							for (size_t i{ 0 }; i < 4; ++i) {
-								const size_t currentIdx = idx + i;
-								tmpIndex[currentTmpIndexPosition] = index[currentIdx];
-
-								if (index[currentIdx] < 0) {
-									uint16_t pulsIndex = ~index[currentIdx];
-
-									tmpIndex[currentTmpIndexPosition + 0] = tmpIndex[currentTmpIndexPosition - 3];
-									tmpIndex[currentTmpIndexPosition + 1] = tmpIndex[currentTmpIndexPosition - 1];
-									tmpIndex[currentTmpIndexPosition + 2] = pulsIndex;
-
-									currentTmpIndexPosition += 3;
-									idx += 4;
-									break;
-								}
-								++currentTmpIndexPosition;
-							}
-							*/
 						}
 					}
 				}
@@ -424,7 +396,6 @@ namespace model::fbx {
 					tmpIndex.resize(index.size());
 					std::copy(index.begin(), index.end(), tmpIndex.begin());
 				}
-						ccc++;
 
 				indeies.push_back(tmpIndex);
 			}
@@ -434,10 +405,6 @@ namespace model::fbx {
 		std::vector<std::vector<Vertex3>> normals{};
 		{
 			for (auto& mesh : meshes) {
-				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				// if (propertyName != "Mesh") continue;
-
 				auto layerElementNormalProp = mesh->findNode("LayerElementNormal");
 
 				auto mappingInfomationTypeProp = layerElementNormalProp->findNode("MappingInformationType");
@@ -520,18 +487,17 @@ namespace model::fbx {
 					}
 				}
 			}
-
-			size_t size = verteies.size();
-			for (size_t idx{ 0 }; idx < size; ++idx) {
-				std::shared_ptr<FBXGeometry> geometry{ new FBXGeometry{} };
-				geometry->vertices = std::move(verteies[idx]);
-				geometry->indexes = std::move(indeies[idx]);
-				geometry->normals = std::move(normals[idx]);
-				result.push_back(geometry);
-			}
-
-			return result;
 		}
 
+		size_t size = verteies.size();
+		for (size_t idx{ 0 }; idx < size; ++idx) {
+			std::shared_ptr<FBXGeometry> geometry{ new FBXGeometry{} };
+			geometry->vertices = std::move(verteies[idx]);
+			geometry->indexes = std::move(indeies[idx]);
+			geometry->normals = std::move(normals[idx]);
+			result.push_back(geometry);
+		}
+
+		return result;
 	}
 }
