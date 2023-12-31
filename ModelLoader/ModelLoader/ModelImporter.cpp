@@ -241,6 +241,7 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 		}
 			
 		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
+			// const auto index = geometry->indexes[i];
 			auto& vNormal = modelVertex[geometry->indexes[i]].normal;
 			vNormal = nols[geometry->indexes[i]];
 
@@ -253,6 +254,13 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 				<< ", z: " << vNormal.z
 				<< " }" << std::endl;
 				*/
+		}
+
+		// uv
+		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
+			// const auto index = geometry->indexes[i];
+			auto& vUv = modelVertex[geometry->indexes[i]].uv;
+			vUv = geometry->uvs[geometry->indexes[i]];
 		}
 
 		++idx;

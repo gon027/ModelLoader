@@ -112,7 +112,7 @@ namespace model::fbx {
 	};
 
 	struct FBXTexture {
-		std::string fileName;
+		std::wstring fileName;
 	};
 
 	struct FBXScene {

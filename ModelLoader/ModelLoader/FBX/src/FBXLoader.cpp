@@ -1,9 +1,11 @@
 #include "../FBXLoader.hpp"
 #include <zlib/zlib.h>
 #include "../../BinaryFile/BinaryFile.hpp"
+#include <unordered_map>
+#include <filesystem>
 
 // #include <Windows.h>
-// #include <iostream>
+#include <iostream>
 
 namespace model::fbx {
 
@@ -241,6 +243,12 @@ namespace model::fbx {
 
 		createFbxScene();
 
+		createFbxScene();
+
+		createFbxTexture();
+
+		createConnections();
+
 		return true;
 	}
 
@@ -263,6 +271,66 @@ namespace model::fbx {
 		}
 
 		fbxGeometrys = std::move(createFBXGeometry());
+
+	}
+
+	void FBXLoader::createFbxTexture()
+	{
+		auto objects = rootNode->findNode("Objects");
+		// テクスチャ
+		auto textures = objects->findNodes("Texture");
+		// std::vector<FBXTexture> textureList{};
+		for (auto& texture : textures) {
+			// auto textureNameProp = texture->findNode("TextureName");
+			// if (!textureNameProp) continue;
+			// auto textureName = getPropertyValue<std::string>(textureNameProp->getProperty(0));
+
+			auto fileNameProp = texture->findNode("FileName");
+			if (!fileNameProp) continue;
+
+			const auto id = getPropertyValue<long long>(texture->getProperty(0));
+
+			auto texture = getPropertyValue<std::string>(fileNameProp->getProperty(0));
+
+			std::filesystem::path textureFilePath{ texture };
+			auto texturePath = textureFilePath.filename();
+
+			FBXTexture fbxTexture{};
+			fbxTexture.fileName = texturePath;
+			// textureList.push_back(fbxTexture);
+
+			fbxTextures.insert({ id, fbxTexture });
+		}
+	}
+
+	void FBXLoader::createConnections()
+	{
+		auto connections = rootNode->findNode("Connections");
+
+		for (auto idx{ 0 }; idx < connections->getChildrenSize(); ++idx) {
+			const auto& child = connections->getChildNode(idx);
+
+			auto connect = getPropertyValue<std::string>(child->getProperty(0));
+			if (connect == "OO") {
+				auto o1 = getPropertyValue<long long>(child->getProperty(1));
+				auto o2 = getPropertyValue<long long>(child->getProperty(2));
+				oos.insert({ o1, o2 });
+			}
+			else if (connect == "OP") {
+				auto o1 = getPropertyValue<long long>(child->getProperty(1));
+				auto o2 = getPropertyValue<long long>(child->getProperty(2));
+				auto diffuseColor = getPropertyValue<std::string>(child->getProperty(3));
+				ops.insert({ o1, o2 });
+			}
+			else if (connect == "PO"){
+			}
+			else {
+			}
+		}
+	}
+
+	void FBXLoader::createMaterial()
+	{
 	}
 
 	std::vector<std::shared_ptr<FBXGeometry>> FBXLoader::createFBXGeometry()
@@ -333,7 +401,7 @@ namespace model::fbx {
 				size_t currentTmpIndexPosition{ 0 };
 				auto index = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
 				if (isPloygonVertexIndex) {
-					
+
 					size_t idx{ 0 };
 					while (idx < index.size()) {
 						size_t offset{ idx };
@@ -456,16 +524,14 @@ namespace model::fbx {
 		}
 
 		// uvs
-		std::vector<std::vector<Vertex2>> uvs{};
+		std::unordered_map<int, std::vector<std::vector<Vertex2>>> uvs{};
 		{
+			int uvId{ 0 };
 			for (auto& mesh : meshes) {
-				// auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-				// auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-				// if (propertyName != "Mesh") continue;
-
 				auto layerElementUVNodes = mesh->findNodes("LayerElementUV");
-				if (layerElementUVNodes.size() != 0) continue;
+				if (layerElementUVNodes.size() == 0) continue;
 
+				std::vector<std::vector<Vertex2>> uvList{};
 				for (auto& layerElementUvNode : layerElementUVNodes) {
 					auto mappingInfomationTypeProp = layerElementUvNode->findNode("MappingInformationType");
 					if (!mappingInfomationTypeProp) continue;
@@ -475,17 +541,52 @@ namespace model::fbx {
 					if (!referenceInformationTypeProp) continue;
 					auto referenceInformationType = getPropertyValue<std::string>(referenceInformationTypeProp->getProperty(0));
 
+					auto uvProp = layerElementUvNode->findNode("UV");
+					if (!uvProp) continue;
+					std::vector<double> uvVec = std::move(getPropertyValue<std::vector<double>>(uvProp->getProperty(0)));
+					const auto uvSize = uvVec.size();
 
 					if (mappingInfomationType == "ByVertice") {  // ByControlPoint
 						if (referenceInformationType == "Direct") {
-						}
-						else if (mappingInfomationType == "ByPolygonVertex") {
-							if (referenceInformationType == "Direct") {
-							}
-						}
 
+						}
+						else if (referenceInformationType == "IndexToDirect") {
+						}
+					}
+					else if (mappingInfomationType == "ByPolygonVertex") {
+						if (referenceInformationType == "Direct") {
+							std::vector<Vertex2> retUvs(uvSize / 2);
+							for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
+								const auto uvIdx = idx / 2;
+								retUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
+								retUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
+							}
+
+							uvList.push_back(retUvs);
+						}
+						else if (referenceInformationType == "IndexToDirect") {
+							auto uvIndexProp = layerElementUvNode->findNode("UVIndex");
+							std::vector<int> uvIndexVec = std::move(getPropertyValue<std::vector<int>>(uvIndexProp->getProperty(0)));
+
+							std::vector<Vertex2> tmpUvs(uvSize / 2);
+							for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
+								const auto uvIdx = idx / 2;
+								tmpUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
+								tmpUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
+							}
+
+							const auto maxUvSize = std::max(tmpUvs.size(), uvIndexVec.size());
+							std::vector<Vertex2> retUvs(maxUvSize);
+							for (size_t idx{ 0 }; idx < maxUvSize; ++idx) {
+								retUvs[idx] = tmpUvs[uvIndexVec[idx]];
+							}
+							uvList.push_back(retUvs);
+						}
 					}
 				}
+
+				uvs.insert({ uvId, uvList });
+				++uvId;
 			}
 		}
 
@@ -495,6 +596,7 @@ namespace model::fbx {
 			geometry->vertices = std::move(verteies[idx]);
 			geometry->indexes = std::move(indeies[idx]);
 			geometry->normals = std::move(normals[idx]);
+			geometry->uvs = std::move(uvs[idx][0]);
 			result.push_back(geometry);
 		}
 
