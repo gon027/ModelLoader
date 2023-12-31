@@ -247,6 +247,10 @@ namespace model::fbx {
 
 		createFbxTexture();
 
+		createMaterial();
+
+		createModel();
+
 		createConnections();
 
 		return true;
@@ -270,7 +274,7 @@ namespace model::fbx {
 			globalSetting->coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
 		}
 
-		fbxGeometrys = std::move(createFBXGeometry());
+		// fbxGeometrys = std::move(createFBXGeometry());
 
 	}
 
@@ -331,6 +335,59 @@ namespace model::fbx {
 
 	void FBXLoader::createMaterial()
 	{
+		auto objects = rootNode->findNode("Objects");
+		auto materials = objects->findNodes("Material");
+		if (materials.size() == 0) return;
+
+		for (auto& material : materials) {
+			const auto id = getPropertyValue<long long>(material->getProperty(0));
+
+			fbxMaterial.insert({ id, {} });
+		}
+
+	}
+
+	void FBXLoader::createModel()
+	{
+		auto objects = rootNode->findNode("Objects");
+		auto models = objects->findNodes("Model");
+		if (models.size() == 0) return;
+
+		std::vector<FBXNode::FBXNodePtr> meshModels{};
+		for (auto& model : models) {
+			auto propStr = getPropertyValue<std::string>(model->getProperty(2));
+			if (propStr != "Mesh") continue;
+			meshModels.push_back(model);
+		}
+
+		for (auto& meshModel : meshModels) {
+			const auto id = getPropertyValue<long long>(meshModel->getProperty(0));
+
+			auto props = meshModel->findNode("Properties70");
+			
+			FBXModel fbxModel{};
+			for (size_t idx{ 0 }; idx < props->getChildrenSize(); ++idx) {
+				const auto& elem = props->getChildNode(idx);
+
+				const auto& ps = getPropertyValue<std::string>(elem->getProperty(0));
+				if (ps == "Lcl Translation") {
+					fbxModel.lclTranslation[0] = (float)(getPropertyValue<double>(elem->getProperty(4)));
+					fbxModel.lclTranslation[1] = (float)(getPropertyValue<double>(elem->getProperty(5)));
+					fbxModel.lclTranslation[2] = (float)(getPropertyValue<double>(elem->getProperty(6)));
+				}
+				else if (ps == "Lcl Rotation") {
+					fbxModel.lclRotation[0] = (float)(getPropertyValue<double>(elem->getProperty(4)));
+					fbxModel.lclRotation[1] = (float)(getPropertyValue<double>(elem->getProperty(5)));
+					fbxModel.lclRotation[2] = (float)(getPropertyValue<double>(elem->getProperty(6)));
+				}
+				else if (ps == "Lcl Scaling") {
+					fbxModel.lclScaling[0] = (float)(getPropertyValue<double>(elem->getProperty(4)));
+					fbxModel.lclScaling[1] = (float)(getPropertyValue<double>(elem->getProperty(5)));
+					fbxModel.lclScaling[2] = (float)(getPropertyValue<double>(elem->getProperty(6)));
+				}
+			}
+			fbxModels.insert({ id, fbxModel });
+		}
 	}
 
 	std::vector<std::shared_ptr<FBXGeometry>> FBXLoader::createFBXGeometry()

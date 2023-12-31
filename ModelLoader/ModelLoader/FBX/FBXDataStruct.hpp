@@ -115,6 +115,12 @@ namespace model::fbx {
 		std::wstring fileName;
 	};
 
+	struct FBXModel {
+		float lclTranslation[3];
+		float lclRotation[3];
+		float lclScaling[3];
+	};
+
 	struct FBXScene {
 		std::vector<std::shared_ptr<FBXGeometry>> geometries;
 		std::vector<std::shared_ptr<FBXMaterial>> materials;
