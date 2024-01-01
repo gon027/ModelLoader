@@ -17,8 +17,28 @@ namespace model::fbx {
 			return rootNode;
 		}
 
-		inline std::vector<std::shared_ptr<FBXGeometry>>& getFBXGeometrys() {
+		inline std::unordered_map<long long, std::shared_ptr<FBXGeometry>>& getFBXGeometrys() {
 			return fbxGeometrys;
+		}
+
+		inline std::unordered_map<long long, FBXModel>& getFBXModels() {
+			return fbxModels;
+		}
+
+		inline std::unordered_map<long long, FBXMaterial>& getFBXMaterials() {
+			return fbxMaterial;
+		}
+
+		inline std::unordered_map<long long, FBXTexture>& getFBXTextures() {
+			return fbxTextures;
+		}
+
+		inline std::unordered_multimap<long long, long long>& getOO() {
+			return oos;
+		}
+
+		inline std::unordered_multimap<long long, long long>& getOP() {
+			return ops;
 		}
 
 	// private:
@@ -35,20 +55,20 @@ namespace model::fbx {
 
 		// std::shared_ptr<FBXGlobalSetting> createFBXGlobalSetting();
 
-		std::vector<std::shared_ptr<FBXGeometry>> createFBXGeometry();
+		void createFBXGeometry();
 
 	private:
 		long long version;
 		std::shared_ptr<FBXNode> rootNode;
 		
 		std::shared_ptr<FBXGlobalSetting> globalSetting;
-		std::vector<std::shared_ptr<FBXGeometry>> fbxGeometrys;
+		std::unordered_map<long long, std::shared_ptr<FBXGeometry>> fbxGeometrys;
 		std::unordered_map<long long, FBXTexture> fbxTextures;
 		std::unordered_map<long long, FBXMaterial> fbxMaterial;
 		std::unordered_map<long long, FBXModel> fbxModels;
 
-		std::unordered_map<long long, long long> ops;
-		std::unordered_map<long long, long long> oos;
+		std::unordered_multimap<long long, long long> ops;
+		std::unordered_multimap<long long, long long> oos;
 
 	};
 

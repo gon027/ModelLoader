@@ -243,7 +243,7 @@ namespace model::fbx {
 
 		createFbxScene();
 
-		createFbxScene();
+		createFBXGeometry();
 
 		createFbxTexture();
 
@@ -273,8 +273,6 @@ namespace model::fbx {
 			globalSetting->coordAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxis"));
 			globalSetting->coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
 		}
-
-		// fbxGeometrys = std::move(createFBXGeometry());
 
 	}
 
@@ -310,7 +308,7 @@ namespace model::fbx {
 	void FBXLoader::createConnections()
 	{
 		auto connections = rootNode->findNode("Connections");
-
+		static int count{ 0 };
 		for (auto idx{ 0 }; idx < connections->getChildrenSize(); ++idx) {
 			const auto& child = connections->getChildNode(idx);
 
@@ -327,8 +325,10 @@ namespace model::fbx {
 				ops.insert({ o1, o2 });
 			}
 			else if (connect == "PO"){
+				++count;
 			}
 			else {
+				++count;
 			}
 		}
 	}
@@ -390,14 +390,12 @@ namespace model::fbx {
 		}
 	}
 
-	std::vector<std::shared_ptr<FBXGeometry>> FBXLoader::createFBXGeometry()
+	void FBXLoader::createFBXGeometry()
 	{
-		std::vector<std::shared_ptr<FBXGeometry>> result{};
-
 		auto objects = rootNode->findNode("Objects");
 		auto geometrys = objects->findNodes("Geometry");
 		if (geometrys.size() == 0) {
-			return result;
+			return;
 		}
 
 		const auto coordAxis = globalSetting->coordAxis;
@@ -449,7 +447,7 @@ namespace model::fbx {
 					isPloygonVertexIndex = false;
 					indexProp = mesh->findNode("Indexes");
 					if (!indexProp) {
-						return {};
+						return;
 					}
 				}
 
@@ -647,16 +645,20 @@ namespace model::fbx {
 			}
 		}
 
-		size_t size = verteies.size();
-		for (size_t idx{ 0 }; idx < size; ++idx) {
+		size_t size = meshes.size();
+		// for (size_t idx{ 0 }; idx < size; ++idx) {
+		size_t idx{ 0 }; 
+		for (auto& mesh : meshes) {
+			const auto id = getPropertyValue<long long>(mesh->getProperty(0));
+
 			std::shared_ptr<FBXGeometry> geometry{ new FBXGeometry{} };
 			geometry->vertices = std::move(verteies[idx]);
 			geometry->indexes = std::move(indeies[idx]);
 			geometry->normals = std::move(normals[idx]);
 			geometry->uvs = std::move(uvs[idx][0]);
-			result.push_back(geometry);
-		}
+			fbxGeometrys.insert({ id, geometry });
 
-		return result;
+			++idx;
+		}
 	}
 }

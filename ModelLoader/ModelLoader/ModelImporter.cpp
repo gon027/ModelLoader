@@ -10,8 +10,9 @@
 #include "Vertex/Vertex.hpp"
 
 #include <iostream>
-#include <ios>     // std::left, std::right
 #include <iomanip>
+#include <algorithm>
+#include <filesystem>
 
 namespace {
 
@@ -195,6 +196,9 @@ float comv(float _val) {
 
 void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDesc)
 {
+	const std::filesystem::path dir{ _modelDesc.modelFileName };
+	const auto parentDir = dir.parent_path();
+
 	model::fbx::FBXLoader fbxLoader{};
 	if (!fbxLoader.load(_modelDesc.modelFileName)) {
 		return;
@@ -205,8 +209,39 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 	modelData->materials.resize(fbxGeometrys.size());
 	size_t prevIndexBeginCount = 0;
 
+	auto& fbxModels = fbxLoader.getFBXModels();
+	auto& fbxMaterials = fbxLoader.getFBXMaterials();
+	auto& fbxTextures = fbxLoader.getFBXTextures();
+	auto& fbxOO = fbxLoader.getOO();
+	auto& fbxOP = fbxLoader.getOP();
+
+	std::unordered_map<long long, long long> modelMaterialIds{};
+	std::unordered_multimap<long long, long long> materialTextureIds{};
+
+	std::vector<long long> connectMaterialIds{};
+	for (const auto& fbxTexture : fbxTextures) {
+		const auto materialId = fbxOP.find(fbxTexture.first);
+		connectMaterialIds.push_back(materialId->second);
+		materialTextureIds.insert({ materialId->second, fbxTexture.first });
+	}
+
+	std::vector<long long> connectModelIds{};
+	for (const auto& connectMaterialId : connectMaterialIds) {
+		auto a = fbxOO.equal_range(connectMaterialId);
+
+		std::for_each(a.first, a.second, [&](auto& e) {
+			// std::cout << e.first << " : " << e.second << std::endl;
+
+			if (fbxModels.contains(e.second)) {
+				connectModelIds.push_back(e.second);
+				modelMaterialIds.insert({ e.second, connectMaterialId });
+			}
+		});
+	}
+
 	size_t idx{ 0 };
-	for (auto& geometry : fbxGeometrys) {
+	for (auto& fbxGeometry : fbxGeometrys) {
+		auto& geometry = fbxGeometry.second;
 
 		// vertex
 		size_t vertexSize = geometry->vertices.size();
@@ -225,35 +260,23 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 		modelData->materials[idx].vertCount = static_cast<unsigned long>(indexSize);
 
 		// normal
+		/*
 		std::vector <model::Vertex3> nols{};
 		size_t normalsSize = geometry->normals.size();
 		for (size_t i{ 0 }; i < normalsSize; ++i) {
 			nols.push_back(geometry->normals[i]);
-
-			/*
-			std::cout
-				<< i / 3 << " = "
-				<< "{ x: " << geometry->normals[i].x
-				<< ", y: " << geometry->normals[i].y
-				<< ", z: " << geometry->normals[i].z
-				<< " }" << std::endl;
-				*/
 		}
-			
+		
 		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
 			// const auto index = geometry->indexes[i];
 			auto& vNormal = modelVertex[geometry->indexes[i]].normal;
 			vNormal = nols[geometry->indexes[i]];
+		}
+		*/
 
-			/*
-			std::cout
-				<< "index[ " 
-				<< geometry->indexes[i] << " ] = "
-				<< "{ x: " << vNormal.x
-				<< ", y: " << vNormal.y
-				<< ", z: " << vNormal.z
-				<< " }" << std::endl;
-				*/
+		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
+			const auto index = geometry->indexes[i];
+			modelVertex[index].normal = geometry->normals[index];
 		}
 
 		// uv
@@ -263,10 +286,29 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 			vUv = geometry->uvs[geometry->indexes[i]];
 		}
 
-		++idx;
+		
+		auto connectModelId = fbxOO.find(fbxGeometry.first);  // Geometry‚©‚çModel‚ðŽæ“¾
+		// Geometry‚©‚çŽæ“¾‚µ‚½Model‚ÆMaterial‚©‚çŽæ“¾‚µ‚½Model‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é‚©ŒŸõ
+		auto connectMaterialId 
+			= std::find(connectModelIds.begin(), connectModelIds.end(), connectModelId->second);
+		if (connectMaterialId != connectModelIds.end()) {
+			const auto id = *connectMaterialId;
+			const auto materialId = modelMaterialIds[id];  // MaterialŽæ“¾
+
+			auto aaa = materialTextureIds.find(materialId);
+
+			if (fbxTextures.contains(aaa->second)) {
+				modelData->materials[idx].textureName 
+					= parentDir.generic_wstring() + L"/" + fbxTextures[aaa->second].fileName;
+			}
+			
+		}
 
 		modelData->vertexes.push_back(modelVertex);
+
+		++idx;
 	}
+
 	modelList.emplace(_name, modelData);
 }
 
