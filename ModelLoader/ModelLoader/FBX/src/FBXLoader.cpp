@@ -525,8 +525,10 @@ namespace model::fbx {
 		}
 
 		// normals
+		// size_t currentMeshIndex{ 0 };
 		std::vector<std::vector<Vertex3>> normals{};
 		{
+			size_t currentIndex{ 0 };
 			for (auto& mesh : meshes) {
 				auto layerElementNormalProp = mesh->findNode("LayerElementNormal");
 
@@ -547,6 +549,7 @@ namespace model::fbx {
 					if (referenceInformationType == "Direct") {
 						// íºê⁄
 						std::vector<Vertex3> retNormals(normalsSize / 3);
+						// size_t resultNormalIdx{ 0 };
 						for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
 							const size_t resultNormalIdx{ idx / 3 };
 							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
@@ -561,7 +564,7 @@ namespace model::fbx {
 				}
 				else if (mappingInfomationType == "ByPolygonVertex") {
 					if (referenceInformationType == "Direct") {
-						// íºê⁄
+						// íºê⁄ wtf
 						std::vector<Vertex3> retNormals(normalsSize / 3);
 						for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
 							const size_t resultNormalIdx{ idx / 3 };
@@ -569,12 +572,62 @@ namespace model::fbx {
 							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
 							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
 						}
+						
+						// 
+						const auto normalSize = indeies[currentIndex].size();
+						std::vector<Vertex3> newNormal(normalSize);
+						
+						if (indeies[currentIndex].size() != retNormals.size()) {
+							auto indexProp = mesh->findNode("PolygonVertexIndex");
+							if (!indexProp) {
+								indexProp = mesh->findNode("Indexes");
+								if (!indexProp) {
+									return;
+								}
+							}
+							auto index = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
+
+							int negativeIndexCount{ 0 };
+							size_t oldIndex{ 0 }, newIndex{ 0 };
+							const auto oldIndexSize = index.size();
+							for (size_t i{ 0 }; i < oldIndexSize; ++i) {
+								newNormal[newIndex] = retNormals[i];
+
+								++negativeIndexCount;
+
+								if (index[oldIndex] < 0) {
+									const auto loopCount = negativeIndexCount - 2;
+									for (auto _{ 0 }; _ < loopCount; ++_) {
+
+									}
+									
+									/*
+									if (negativeIndexCount >= 4) {
+										newNormal[newIndex + 1] = retNormals[i - 3];
+										newNormal[newIndex + 2] = retNormals[i - 1];
+										newNormal[newIndex + 3] = retNormals[i + 2];
+										newIndex += 3;
+									}
+									*/
+
+									negativeIndexCount = 0;
+								}
+
+								++newIndex;
+							}
+
+
+						}
+
+
 						normals.push_back(retNormals);
 					}
+
 					else if (referenceInformationType == "IndexToDirect") {
 						// Todo: ç°ÇÃÇ∆Ç±ÇÎå©Ç»Ç¢ÇÃÇ≈ÅAå©ÇΩÇÁé¿ëï
 					}
 				}
+				++currentIndex;
 			}
 		}
 
@@ -646,18 +699,16 @@ namespace model::fbx {
 		}
 
 		size_t size = meshes.size();
-		// for (size_t idx{ 0 }; idx < size; ++idx) {
 		size_t idx{ 0 }; 
 		for (auto& mesh : meshes) {
 			const auto id = getPropertyValue<long long>(mesh->getProperty(0));
-
 			std::shared_ptr<FBXGeometry> geometry{ new FBXGeometry{} };
+			std::cout << verteies[idx].size() << ", " << indeies[idx].size() << " , " << normals[idx].size() << std::endl;
 			geometry->vertices = std::move(verteies[idx]);
 			geometry->indexes = std::move(indeies[idx]);
 			geometry->normals = std::move(normals[idx]);
 			geometry->uvs = std::move(uvs[idx][0]);
 			fbxGeometrys.insert({ id, geometry });
-
 			++idx;
 		}
 	}

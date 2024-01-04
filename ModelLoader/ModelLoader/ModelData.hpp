@@ -17,6 +17,12 @@ namespace model {
 		Vertex2 uv;
 	};
 
+	struct ModelTransform {
+		Vertex3 transform;
+		Vertex3 rotation;
+		Vertex3 scale;
+	};
+
 	// 描画用のモデルデータ
 	struct ModelData {
 	public:
@@ -43,6 +49,7 @@ namespace model {
 		std::vector<std::vector<ModelVertex>> vertexes;
 		std::vector<std::vector<unsigned int>> indexes;
 		std::vector<Material> materials;
+		std::vector<ModelTransform> transform;
 	};
 
 }

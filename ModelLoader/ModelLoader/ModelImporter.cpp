@@ -243,50 +243,64 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 	for (auto& fbxGeometry : fbxGeometrys) {
 		auto& geometry = fbxGeometry.second;
 
-		// vertex
-		size_t vertexSize = geometry->vertices.size();
-		std::vector<model::ModelVertex> modelVertex(vertexSize);
-		for (size_t i{ 0 }; i < geometry->vertices.size(); ++i) {
-			modelVertex[i].position = geometry->vertices[i];
-		}
-
 		// index
 		size_t indexSize = geometry->indexes.size();
 		std::vector<unsigned int> modelIndex(indexSize);
 		std::copy(geometry->indexes.begin(), geometry->indexes.end(), modelIndex.begin());
 		modelData->indexes.push_back(modelIndex);
-
-		// material
 		modelData->materials[idx].vertCount = static_cast<unsigned long>(indexSize);
 
-		// normal
+		// vertex
 		/*
-		std::vector <model::Vertex3> nols{};
-		size_t normalsSize = geometry->normals.size();
-		for (size_t i{ 0 }; i < normalsSize; ++i) {
-			nols.push_back(geometry->normals[i]);
-		}
-		
-		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
-			// const auto index = geometry->indexes[i];
-			auto& vNormal = modelVertex[geometry->indexes[i]].normal;
-			vNormal = nols[geometry->indexes[i]];
+		size_t vertexSize = geometry->vertices.size();
+		std::vector<model::ModelVertex> modelVertex(vertexSize);
+		for (size_t i{ 0 }; i < geometry->vertices.size(); ++i) {
+			modelVertex[i].position = geometry->vertices[i];
 		}
 		*/
 
-		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
-			const auto index = geometry->indexes[i];
-			modelVertex[index].normal = geometry->normals[index];
+		const size_t vertexSize = indexSize;
+		std::vector<model::ModelVertex> modelVertex(vertexSize);
+		for (size_t i{ 0 }; i < vertexSize; ++i) {
+			const auto indexPointer = geometry->indexes[i];
+			modelVertex[i].position = geometry->vertices[indexPointer];
 		}
 
+		// material
+
+		// normal
+		if (geometry->vertices.size() == geometry->normals.size()) {
+			const size_t normalSize = indexSize;
+			for (size_t i{ 0 }; i < normalSize; ++i) {
+				const auto indexPointer = geometry->indexes[i];
+				modelVertex[i].normal = geometry->normals[indexPointer];
+				
+			}
+		}
+		else if(geometry->indexes.size() == geometry->normals.size()) {
+			const size_t normalSize = indexSize;
+			for (size_t i{ 0 }; i < normalSize; ++i) {
+				modelVertex[i].normal = geometry->normals[i];
+			}
+		}
+
+		/*
 		// uv
-		for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
-			// const auto index = geometry->indexes[i];
-			auto& vUv = modelVertex[geometry->indexes[i]].uv;
-			vUv = geometry->uvs[geometry->indexes[i]];
+		if (geometry->vertices.size() == geometry->uvs.size()) {
+			for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
+				const auto index = geometry->indexes[i];
+				modelVertex[index].uv = geometry->uvs[index];
+			}
 		}
+		else if (geometry->indexes.size() == geometry->uvs.size()) {
+			const size_t uvSize = indexSize;
+			for (size_t i{ 0 }; i < uvSize; ++i) {
+				modelVertex[i].uv = geometry->uvs[i];
+			}
 
-		
+		}
+		*/
+
 		auto connectModelId = fbxOO.find(fbxGeometry.first);  // Geometry‚©‚çModel‚ðŽæ“¾
 		// Geometry‚©‚çŽæ“¾‚µ‚½Model‚ÆMaterial‚©‚çŽæ“¾‚µ‚½Model‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é‚©ŒŸõ
 		auto connectMaterialId 
@@ -305,6 +319,26 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 		}
 
 		modelData->vertexes.push_back(modelVertex);
+
+		++idx;
+	}
+
+	// transform
+	modelData->transform.resize(fbxModels.size());
+	idx = 0;
+	for (auto& fbxModel : fbxModels) {
+		auto& model = fbxModel.second;
+		modelData->transform[idx].transform.x = model.lclTranslation[0];
+		modelData->transform[idx].transform.y = model.lclTranslation[1];
+		modelData->transform[idx].transform.z = model.lclTranslation[2];
+
+		modelData->transform[idx].rotation.x = model.lclRotation[0];
+		modelData->transform[idx].rotation.y = model.lclRotation[1];
+		modelData->transform[idx].rotation.z = model.lclRotation[2];
+
+		modelData->transform[idx].scale.x = model.lclScaling[0];
+		modelData->transform[idx].scale.y = model.lclScaling[1];
+		modelData->transform[idx].scale.z = model.lclScaling[2];
 
 		++idx;
 	}
