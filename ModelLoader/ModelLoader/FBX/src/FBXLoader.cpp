@@ -594,33 +594,27 @@ namespace model::fbx {
 								newNormal[newIndex] = retNormals[i];
 
 								++negativeIndexCount;
-
-								if (index[oldIndex] < 0) {
-									const auto loopCount = negativeIndexCount - 2;
-									for (auto _{ 0 }; _ < loopCount; ++_) {
-
-									}
-									
-									/*
-									if (negativeIndexCount >= 4) {
-										newNormal[newIndex + 1] = retNormals[i - 3];
-										newNormal[newIndex + 2] = retNormals[i - 1];
-										newNormal[newIndex + 3] = retNormals[i + 2];
+								if (index[i] < 0) {
+									const auto loopCount = negativeIndexCount - 2 - 1;
+									for (auto lp{ 0 }; lp < loopCount; ++lp) {
+										newNormal[newIndex + 0] = newNormal[newIndex - 3];
+										newNormal[newIndex + 1] = newNormal[newIndex - 1];
+										newNormal[newIndex + 2] = retNormals[i];
 										newIndex += 3;
+										// ++i;
 									}
-									*/
-
 									negativeIndexCount = 0;
 								}
-
-								++newIndex;
+								else {
+									++newIndex;
+								}
 							}
 
-
+							normals.push_back(newNormal);
 						}
-
-
-						normals.push_back(retNormals);
+						else {
+							normals.push_back(retNormals);
+						}
 					}
 
 					else if (referenceInformationType == "IndexToDirect") {
