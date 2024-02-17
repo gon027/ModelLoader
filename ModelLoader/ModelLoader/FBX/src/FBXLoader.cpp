@@ -494,7 +494,6 @@ namespace model::fbx {
 
 							// 5 .. 2
 							const size_t loopCount = (countToNegativeIndex - 2) - 1;
-							OutputDebugString(L"fjeijfieffefefeef\n");
 							for (size_t i{ 0 }; i < loopCount; ++i) {
 								const size_t currentIdx = idx + i;
 
@@ -551,35 +550,17 @@ namespace model::fbx {
 				// .fbxから取得した法線はVector4型となり、その合計分ある
 				const auto totalNormalsSize = normalsVec.size();
 
-				/*
-				// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
-				const size_t correctedNormalSize = totalNormalsSize - (totalNormalsSize % 4);
-
-				// 最終的に求める法線の数
-				// 全体の法線の数 - { (余分の値を取り除いた法線の数 / 4) + (全体の法線のサイズ % 4) }
-				const size_t correctedVecNormal = totalNormalsSize - ((correctedNormalSize / 4) + (totalNormalsSize % 4));
-
-				
 				{
-					std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) };
-
-					// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
-					s += L", correctedNormal = " + std::to_wstring(correctedNormalSize);
-
-					// 最終的に求める法線の数
-					s += L", correctedVecNormal = " + std::to_wstring(correctedVecNormal);
-					s += L"\n";
-
+					std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) + L"\n" };
 					OutputDebugString(s.c_str());
 				}
-				*/
 
 				if (mappingInfomationType == "ByVertice") {  // ByControlPoint
 					if (referenceInformationType == "Direct") {
+						
 
 						// 取得した法線のサイズがインデックスと同じ場合
 						if (totalNormalsSize / 3 == verteies[currentIndex].size()) {
-						// if (totalNormalsSize == indeies[currentIndex].size()) {
 							std::vector<Vertex3> retNormals(totalNormalsSize / 3);
 							for (size_t idx{ 0 }; idx < totalNormalsSize; idx += 3) {
 								const size_t resultNormalIdx{ idx / 3 };
@@ -590,59 +571,41 @@ namespace model::fbx {
 							normals.push_back(retNormals);
 						}
 						else {
+							OutputDebugString(L"FBXLoader::createFBXGeometry not read normal by over 4 dimentions.");
 
-						}
-
-						/*
-						// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
-						const size_t correctedNormalSize = totalNormalsSize - (totalNormalsSize % 4);
-
-						// 最終的に求める法線の数
-						// 全体の法線の数 - { (余分の値を取り除いた法線の数 / 4) + (全体の法線のサイズ % 4) }
-						const size_t correctedVecNormal = totalNormalsSize - ((correctedNormalSize / 4) + (totalNormalsSize % 4));
-
-						// indexと同じなら処理する???
-						{
-							std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) };
-
+							// Todo: テストしていない
 							// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
-							s += L", correctedNormal = " + std::to_wstring(correctedNormalSize);
+							const size_t correctedNormalSize = totalNormalsSize - (totalNormalsSize % 4);
 
 							// 最終的に求める法線の数
-							s += L", correctedVecNormal = " + std::to_wstring(correctedVecNormal);
-							s += L"\n";
+							// 全体の法線の数 - { (余分の値を取り除いた法線の数 / 4) + (全体の法線のサイズ % 4) }
+							const size_t correctedVecNormal = totalNormalsSize - ((correctedNormalSize / 4) + (totalNormalsSize % 4));
 
-							OutputDebugString(s.c_str());
+							std::vector<Vertex3> retNormals(correctedVecNormal / 3);
+							for (size_t idx{ 0 }; idx < correctedNormalSize; idx += 4) {
+								const size_t resultNormalIdx{ idx / 4 };
+								retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
+								retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
+								retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
+							}
+
+							normals.push_back(retNormals);
 						}
-
-
-						std::vector<Vertex3> retNormals(correctedVecNormal / 3);
-						for (size_t idx{ 0 }; idx < correctedNormalSize; idx += 4) {
-							const size_t resultNormalIdx{ idx / 4 };
-							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
-							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
-							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
-						}
-						*/
-						// 法線をそのまま格納
-						
 					}
 					// else if (referenceInformationType == "IndexToDirect") { }
 				}
 				else if (mappingInfomationType == "ByPolygonVertex") {
 					if (referenceInformationType == "Direct") {
-						{
-							std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) + L"\n" };
-							OutputDebugString(s.c_str());
-						}
 
 						std::vector<Vertex3> retNormals(totalNormalsSize / 3);
+						retNormals.resize(totalNormalsSize / 3);
 						for (size_t idx{ 0 }; idx < totalNormalsSize; idx += 3) {
 							const size_t resultNormalIdx{ idx / 3 };
 							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
 							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
 							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
 						}
+
 						// 法線を細工する
 						if (indeies[currentIndex].size() != retNormals.size()) {
 							auto indexProp = mesh->findNode("PolygonVertexIndex");
