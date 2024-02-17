@@ -12,6 +12,7 @@ namespace model {
 		float y;
 		float z;
 
+		/*
 		inline bool operator==(const Vertex3& _v) {
 			return (x == _v.x) && (y == _v.y) && (z == _v.z);
 		}
@@ -19,6 +20,7 @@ namespace model {
 		inline bool operator!=(const Vertex3& _v) {
 			return !(*this == _v);
 		}
+		*/
 	};
 
 	struct Vertex4 {

@@ -4,12 +4,16 @@
 #include <unordered_map>
 #include <filesystem>
 
-// #include <Windows.h>
+ #include <Windows.h>
 #include <iostream>
 
 namespace model::fbx {
 
 	namespace {
+
+		namespace EndString {
+			std::string connectionsStr{""};
+		}
 
 		unsigned char* inflateData(const char* _inData, unsigned long long _elem, unsigned long long _byte, unsigned long long _typeSize) {
 			z_stream zs{};
@@ -72,9 +76,6 @@ namespace model::fbx {
 			return result;
 		}
 
-		
-
-		int cnt = 0;
 		std::shared_ptr<FBXNode> readNode(BinaryFile& _bf, long long _version) {
 			long long dist{ 0 };
 			long long attributeNum{ 0 };
@@ -99,11 +100,16 @@ namespace model::fbx {
 			if (dist == 0 && attributeNum == 0 && attributeTotalBytes == 0 && nodeNameTotalBytes == 0) {
 				return nullptr;
 			}
+			else {
+				// Todo: 16バイトのデータをなんとかしたい...
+				if (EndString::connectionsStr == "Connections") return nullptr;
+			}
 
 
 			// ノード名
 			char nodeName[64]{};
 			_bf.read((char*)&nodeName, sizeof(char) * nodeNameTotalBytes);
+			EndString::connectionsStr = std::string{ nodeName };
 
 			std::shared_ptr<FBXNode> object{ new FBXNode{} };
 			object->setName(nodeName);
@@ -180,16 +186,14 @@ namespace model::fbx {
 
 			// 子ノードがあり、nullptrではなければ
 			while (_bf.getPosition() < dist) {
-				cnt++;
 				std::string a{ 
 					"position = " + std::to_string(_bf.getPosition()) 
 					+ ", dist = " + std::to_string(dist) 
 					+ ", nodeName = " + std::string{ nodeName }
 				};
 				// std::cout << a << std::endl;
-				// OutputDebugString(a.c_str());
+				// OutputDebugString(std::wstring{ a }.c_str());
 				auto child = readNode(_bf, _version);
-				cnt--;
 				if (child) {
 					object->addNode(child);
 				}
@@ -392,12 +396,6 @@ namespace model::fbx {
 
 	void FBXLoader::createFBXGeometry()
 	{
-		auto objects = rootNode->findNode("Objects");
-		auto geometrys = objects->findNodes("Geometry");
-		if (geometrys.size() == 0) {
-			return;
-		}
-
 		const auto coordAxis = globalSetting->coordAxis;
 		const auto upAxis = globalSetting->upAxis;
 		const auto frontAxis = globalSetting->frontAxis;
@@ -406,13 +404,9 @@ namespace model::fbx {
 		const auto upAxisSign = globalSetting->upAxisSing;
 		const auto frontAxisSign = globalSetting->frontAxisSign;
 
-		std::vector<model::fbx::FBXNode::FBXNodePtr> meshes{};
-		for (auto& geometry : geometrys) {
-			auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
-			auto propertyName = getPropertyValue<std::string>(propertyNameProp);
-			if (propertyName == "Mesh") {
-				meshes.emplace_back(geometry);
-			}
+		auto meshes = rootNode->getMeshNode();
+		if (meshes.size() == 0) {
+			return;
 		}
 
 		// Vertex
@@ -423,8 +417,10 @@ namespace model::fbx {
 				auto vertex = getPropertyValue<std::vector<double>>(vertexProp);
 
 				// Todo: FBXの配列を変換する
-				std::vector<Vertex3> retVertex(vertex.size() / 3);
-				for (size_t idx{ 0 }; idx < vertex.size(); idx += 3) {
+				const size_t vertexSize = vertex.size();
+				const size_t vertexVecSize = vertexSize / 3;
+				std::vector<Vertex3> retVertex(vertexVecSize);
+				for (size_t idx{ 0 }; idx < vertexSize; idx += 3) {
 					const size_t reslutVertexIdx{ idx / 3 };
 					retVertex[reslutVertexIdx].x = static_cast<float>(coordAxisSign * vertex[idx + coordAxis]);
 					retVertex[reslutVertexIdx].y = static_cast<float>(upAxisSign * vertex[idx + upAxis]);
@@ -432,6 +428,9 @@ namespace model::fbx {
 				}
 
 				verteies.push_back(retVertex);
+
+				std::wstring s{ L"Vertices = " + std::to_wstring(vertex.size()) + L'\n' };
+				OutputDebugString(s.c_str());
 			}
 		}
 
@@ -495,6 +494,7 @@ namespace model::fbx {
 
 							// 5 .. 2
 							const size_t loopCount = (countToNegativeIndex - 2) - 1;
+							OutputDebugString(L"fjeijfieffefefeef\n");
 							for (size_t i{ 0 }; i < loopCount; ++i) {
 								const size_t currentIdx = idx + i;
 
@@ -502,7 +502,7 @@ namespace model::fbx {
 								tmpIndex[currentTmpIndexPosition + 1] = tmpIndex[currentTmpIndexPosition - 1];
 
 								if (index[currentIdx] < 0) {
-									uint16_t pulsIndex = ~index[currentIdx];
+									uint16_t pulsIndex = ~index[currentIdx];  // 2^16以上どうしよ...?
 									tmpIndex[currentTmpIndexPosition + 2] = pulsIndex;
 								}
 								else {
@@ -519,8 +519,10 @@ namespace model::fbx {
 					tmpIndex.resize(index.size());
 					std::copy(index.begin(), index.end(), tmpIndex.begin());
 				}
-
 				indeies.push_back(tmpIndex);
+
+				std::wstring s{ L"Index = " + std::to_wstring(tmpIndex.size()) + L'\n' };
+				OutputDebugString(s.c_str());
 			}
 		}
 
@@ -530,6 +532,8 @@ namespace model::fbx {
 		{
 			size_t currentIndex{ 0 };
 			for (auto& mesh : meshes) {
+				
+
 				auto layerElementNormalProp = mesh->findNode("LayerElementNormal");
 
 				auto mappingInfomationTypeProp = layerElementNormalProp->findNode("MappingInformationType");
@@ -543,70 +547,146 @@ namespace model::fbx {
 				auto normalsProp = layerElementNormalProp->findNode("Normals");
 				if (!normalsProp) continue;
 				std::vector<double> normalsVec = std::move(getPropertyValue<std::vector<double>>(normalsProp->getProperty(0)));
-				const auto normalsSize = normalsVec.size();
+				
+				// .fbxから取得した法線はVector4型となり、その合計分ある
+				const auto totalNormalsSize = normalsVec.size();
+
+				/*
+				// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
+				const size_t correctedNormalSize = totalNormalsSize - (totalNormalsSize % 4);
+
+				// 最終的に求める法線の数
+				// 全体の法線の数 - { (余分の値を取り除いた法線の数 / 4) + (全体の法線のサイズ % 4) }
+				const size_t correctedVecNormal = totalNormalsSize - ((correctedNormalSize / 4) + (totalNormalsSize % 4));
+
+				
+				{
+					std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) };
+
+					// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
+					s += L", correctedNormal = " + std::to_wstring(correctedNormalSize);
+
+					// 最終的に求める法線の数
+					s += L", correctedVecNormal = " + std::to_wstring(correctedVecNormal);
+					s += L"\n";
+
+					OutputDebugString(s.c_str());
+				}
+				*/
 
 				if (mappingInfomationType == "ByVertice") {  // ByControlPoint
 					if (referenceInformationType == "Direct") {
-						// 直接
-						std::vector<Vertex3> retNormals(normalsSize / 3);
-						// size_t resultNormalIdx{ 0 };
-						for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
-							const size_t resultNormalIdx{ idx / 3 };
+
+						// 取得した法線のサイズがインデックスと同じ場合
+						if (totalNormalsSize / 3 == verteies[currentIndex].size()) {
+						// if (totalNormalsSize == indeies[currentIndex].size()) {
+							std::vector<Vertex3> retNormals(totalNormalsSize / 3);
+							for (size_t idx{ 0 }; idx < totalNormalsSize; idx += 3) {
+								const size_t resultNormalIdx{ idx / 3 };
+								retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
+								retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
+								retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
+							}
+							normals.push_back(retNormals);
+						}
+						else {
+
+						}
+
+						/*
+						// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
+						const size_t correctedNormalSize = totalNormalsSize - (totalNormalsSize % 4);
+
+						// 最終的に求める法線の数
+						// 全体の法線の数 - { (余分の値を取り除いた法線の数 / 4) + (全体の法線のサイズ % 4) }
+						const size_t correctedVecNormal = totalNormalsSize - ((correctedNormalSize / 4) + (totalNormalsSize % 4));
+
+						// indexと同じなら処理する???
+						{
+							std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) };
+
+							// 取得した全体の法線の数から、最後に余分の値があるため、それを取り除いた法線の数
+							s += L", correctedNormal = " + std::to_wstring(correctedNormalSize);
+
+							// 最終的に求める法線の数
+							s += L", correctedVecNormal = " + std::to_wstring(correctedVecNormal);
+							s += L"\n";
+
+							OutputDebugString(s.c_str());
+						}
+
+
+						std::vector<Vertex3> retNormals(correctedVecNormal / 3);
+						for (size_t idx{ 0 }; idx < correctedNormalSize; idx += 4) {
+							const size_t resultNormalIdx{ idx / 4 };
 							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
 							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
 							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
 						}
-						normals.push_back(retNormals);
+						*/
+						// 法線をそのまま格納
+						
 					}
-					// else if (referenceInformationType == "IndexToDirect") {
-					// 考慮しなくてよい
-					// }
+					// else if (referenceInformationType == "IndexToDirect") { }
 				}
 				else if (mappingInfomationType == "ByPolygonVertex") {
 					if (referenceInformationType == "Direct") {
-						// 直接 wtf
-						std::vector<Vertex3> retNormals(normalsSize / 3);
-						for (size_t idx{ 0 }; idx < normalsSize; idx += 3) {
+						{
+							std::wstring s{ L"totalNormalsSize = " + std::to_wstring(totalNormalsSize) + L"\n" };
+							OutputDebugString(s.c_str());
+						}
+
+						std::vector<Vertex3> retNormals(totalNormalsSize / 3);
+						for (size_t idx{ 0 }; idx < totalNormalsSize; idx += 3) {
 							const size_t resultNormalIdx{ idx / 3 };
 							retNormals[resultNormalIdx].x = static_cast<float>(normalsVec[idx + coordAxis]);
 							retNormals[resultNormalIdx].y = static_cast<float>(normalsVec[idx + upAxis]);
 							retNormals[resultNormalIdx].z = static_cast<float>(normalsVec[idx + frontAxis]);
 						}
-						
-						// 
-						const auto normalSize = indeies[currentIndex].size();
-						std::vector<Vertex3> newNormal(normalSize);
-						
+						// 法線を細工する
 						if (indeies[currentIndex].size() != retNormals.size()) {
 							auto indexProp = mesh->findNode("PolygonVertexIndex");
 							if (!indexProp) {
 								indexProp = mesh->findNode("Indexes");
-								if (!indexProp) {
-									return;
-								}
+								if (!indexProp) return;
 							}
-							auto index = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
+							const auto indexVec = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
+							const size_t indexVecSize{ indexVec.size() };
 
-							int negativeIndexCount{ 0 };
-							size_t oldIndex{ 0 }, newIndex{ 0 };
-							const auto oldIndexSize = index.size();
-							for (size_t i{ 0 }; i < oldIndexSize; ++i) {
-								newNormal[newIndex] = retNormals[i];
+							// indexを考慮した法線配列にするため、配列を拡張する
+							const auto extensionNormalSize = indeies[currentIndex].size();
+							std::vector<Vertex3> newNormal(extensionNormalSize);
 
-								++negativeIndexCount;
-								if (index[i] < 0) {
-									const auto loopCount = negativeIndexCount - 2 - 1;
-									for (auto lp{ 0 }; lp < loopCount; ++lp) {
-										newNormal[newIndex + 0] = newNormal[newIndex - 3];
-										newNormal[newIndex + 1] = newNormal[newIndex - 1];
-										newNormal[newIndex + 2] = retNormals[i];
-										newIndex += 3;
-										// ++i;
+							int toNegativeIndexCount{ 0 };
+							size_t newNormalIndex{ 0 }, oldNormalIndex{ 0 };
+							for (size_t idx{ 0 }; idx < indexVecSize; ++idx) {
+								auto originNormalIndex = indexVec[idx];
+
+								if (originNormalIndex < 0) {
+									const auto normalStorageLoopCount = toNegativeIndexCount - 2;
+
+									if (normalStorageLoopCount == 0) {  // 3のとき
+										newNormal[newNormalIndex] = retNormals[oldNormalIndex];
+										++newNormalIndex;
+										++oldNormalIndex;
 									}
-									negativeIndexCount = 0;
+									else {  // 4より多いとき
+										for (size_t _{ 0 }; _ < normalStorageLoopCount; ++_) {
+											newNormal[newNormalIndex + 0] = newNormal[newNormalIndex - 3];
+											newNormal[newNormalIndex + 1] = newNormal[newNormalIndex - 1];
+											newNormal[newNormalIndex + 2] = retNormals[oldNormalIndex];
+											newNormalIndex += 3;
+											++oldNormalIndex;
+										}
+									}
+
+									toNegativeIndexCount = 0;
 								}
 								else {
-									++newIndex;
+									newNormal[newNormalIndex] = retNormals[oldNormalIndex];
+									++newNormalIndex;
+									++oldNormalIndex;
+									++toNegativeIndexCount;
 								}
 							}
 
@@ -616,10 +696,7 @@ namespace model::fbx {
 							normals.push_back(retNormals);
 						}
 					}
-
-					else if (referenceInformationType == "IndexToDirect") {
-						// Todo: 今のところ見ないので、見たら実装
-					}
+					// else if (referenceInformationType == "IndexToDirect") { }
 				}
 				++currentIndex;
 			}
@@ -649,40 +726,43 @@ namespace model::fbx {
 					const auto uvSize = uvVec.size();
 
 					if (mappingInfomationType == "ByVertice") {  // ByControlPoint
-						if (referenceInformationType == "Direct") {
-
-						}
-						else if (referenceInformationType == "IndexToDirect") {
-						}
+						// if (referenceInformationType == "Direct") { }
+						// else if (referenceInformationType == "IndexToDirect") { }
 					}
 					else if (mappingInfomationType == "ByPolygonVertex") {
 						if (referenceInformationType == "Direct") {
 							std::vector<Vertex2> retUvs(uvSize / 2);
-							for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
-								const auto uvIdx = idx / 2;
-								retUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
-								retUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
-							}
-
+							// for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
+							// 	const auto uvIdx = idx / 2;
+							// 	retUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
+							// 	retUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
+							// }
 							uvList.push_back(retUvs);
 						}
 						else if (referenceInformationType == "IndexToDirect") {
 							auto uvIndexProp = layerElementUvNode->findNode("UVIndex");
 							std::vector<int> uvIndexVec = std::move(getPropertyValue<std::vector<int>>(uvIndexProp->getProperty(0)));
+							const size_t uvIndexVecSize = uvIndexVec.size();
+
+							std::wstring s{ L"UVSize = " + std::to_wstring(uvSize) + L", uvIndexVecSize = " + std::to_wstring(uvIndexVec.size()) + L'\n'};
+							OutputDebugString(s.c_str());
 
 							std::vector<Vertex2> tmpUvs(uvSize / 2);
-							for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
-								const auto uvIdx = idx / 2;
-								tmpUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
-								tmpUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
-							}
+							// for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
+							// 	const auto uvIdx = idx / 2;
+							// 	tmpUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
+							// 	tmpUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
+							// }
+							// uvList.push_back(tmpUvs);
 
-							const auto maxUvSize = std::max(tmpUvs.size(), uvIndexVec.size());
+							// const auto maxUvSize = max(tmpUvs.size(), uvIndexVec.size());
+							const auto maxUvSize = uvIndexVecSize;
 							std::vector<Vertex2> retUvs(maxUvSize);
-							for (size_t idx{ 0 }; idx < maxUvSize; ++idx) {
-								retUvs[idx] = tmpUvs[uvIndexVec[idx]];
-							}
+							//for (size_t idx{0}; idx < maxUvSize; ++idx) {
+							//	retUvs[idx] = tmpUvs[uvIndexVec[idx]];
+							//}
 							uvList.push_back(retUvs);
+							
 						}
 					}
 				}
@@ -697,7 +777,7 @@ namespace model::fbx {
 		for (auto& mesh : meshes) {
 			const auto id = getPropertyValue<long long>(mesh->getProperty(0));
 			std::shared_ptr<FBXGeometry> geometry{ new FBXGeometry{} };
-			std::cout << verteies[idx].size() << ", " << indeies[idx].size() << " , " << normals[idx].size() << std::endl;
+			// std::cout << verteies[idx].size() << ", " << indeies[idx].size() << " , " << normals[idx].size() << std::endl;
 			geometry->vertices = std::move(verteies[idx]);
 			geometry->indexes = std::move(indeies[idx]);
 			geometry->normals = std::move(normals[idx]);

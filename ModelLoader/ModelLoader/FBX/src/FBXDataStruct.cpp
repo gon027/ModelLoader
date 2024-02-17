@@ -94,6 +94,31 @@ namespace model::fbx {
 		return nullptr;
 	}
 
+	std::vector<model::fbx::FBXNode::FBXNodePtr> FBXNode::getMeshNode()
+	{
+		std::vector<model::fbx::FBXNode::FBXNodePtr> result{};
+
+		auto objects = findNode("Objects");
+		if (!objects) {
+			return result;
+		}
+
+		auto geometrys = objects->findNodes("Geometry");
+		if (geometrys.size() == 0) {
+			return result;
+		}
+		
+		for (auto& geometry : geometrys) {
+			auto propertyNameProp = geometry->getProperty(geometry->getPropertysSize() - 1);
+			auto propertyName = getPropertyValue<std::string>(propertyNameProp);
+			if (propertyName == "Mesh") {
+				result.emplace_back(geometry);
+			}
+		}
+
+		return result;
+	}
+
 	std::vector<FBXNode::FBXNodePtr> FBXNode::findNodes(const std::string& _name)
 	{
 		std::vector<FBXNode::FBXNodePtr> result{};

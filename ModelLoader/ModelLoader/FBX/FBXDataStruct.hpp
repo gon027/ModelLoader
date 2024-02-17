@@ -36,6 +36,8 @@ namespace model::fbx {
 
 		FBXPropertyPtr findPropertyForChildren(const std::string& _name);
 
+		std::vector<model::fbx::FBXNode::FBXNodePtr> getMeshNode();
+
 		inline std::string getNodeName() const {
 			return name;
 		}

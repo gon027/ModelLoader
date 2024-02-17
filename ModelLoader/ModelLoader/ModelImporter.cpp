@@ -217,7 +217,7 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 
 	std::unordered_map<long long, long long> modelMaterialIds{};
 	std::unordered_multimap<long long, long long> materialTextureIds{};
-
+	/*
 	std::vector<long long> connectMaterialIds{};
 	for (const auto& fbxTexture : fbxTextures) {
 		const auto materialId = fbxOP.find(fbxTexture.first);
@@ -238,6 +238,7 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 			}
 		});
 	}
+	*/
 
 	size_t idx{ 0 };
 	for (auto& fbxGeometry : fbxGeometrys) {
@@ -259,9 +260,18 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 		}
 		*/
 
-		const size_t vertexSize = indexSize;
-		std::vector<model::ModelVertex> modelVertex(vertexSize);
-		for (size_t i{ 0 }; i < vertexSize; ++i) {
+		
+		std::cout << "Model Vertex Size = " << indexSize << std::endl;
+		std::string s{
+			"Vertex Size = " + std::to_string(geometry->vertices.size())
+			+ ", Index Size = " + std::to_string(geometry->indexes.size())
+			+ ", Normal Size = " + std::to_string(geometry->normals.size())
+			+ ", UV Size = " + std::to_string(geometry->uvs.size()) };
+		std::cout << s << std::endl;
+
+		const size_t ModelVertexSize = indexSize;
+		std::vector<model::ModelVertex> modelVertex(ModelVertexSize);
+		for (size_t i{ 0 }; i < ModelVertexSize; ++i) {
 			const auto indexPointer = geometry->indexes[i];
 			modelVertex[i].position = geometry->vertices[indexPointer];
 		}
@@ -269,38 +279,49 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 		// material
 
 		// normal
-		if (geometry->vertices.size() == geometry->normals.size()) {
-			const size_t normalSize = indexSize;
+		if (ModelVertexSize != geometry->normals.size()) {
+			const size_t normalSize = ModelVertexSize;
 			for (size_t i{ 0 }; i < normalSize; ++i) {
 				const auto indexPointer = geometry->indexes[i];
 				modelVertex[i].normal = geometry->normals[indexPointer];
-				
 			}
 		}
-		else if(geometry->indexes.size() == geometry->normals.size()) {
+		else /*if (geometry->indexes.size() == geometry->normals.size())*/ {
+			// Ç±Ç¡ÇøÇ©...
+			// í∏ì_ÇÇªÇÃÇ‹Ç‹ó¨ÇµçûÇﬁ
+			// Ç≈ÇÕÇæÇﬂÇ›ÇΩÇ¢...
 			const size_t normalSize = indexSize;
 			for (size_t i{ 0 }; i < normalSize; ++i) {
+
 				modelVertex[i].normal = geometry->normals[i];
 			}
+			std::cout << 1 << std::endl;
+
+			// const size_t normalSize = indexSize;
+			// for (size_t i{ 0 }; i < normalSize; ++i) {
+			// 	const auto indexPointer = geometry->indexes[i];
+			// 	modelVertex[i].normal = geometry->normals[indexPointer];
+			// 	
+			// }
 		}
 
-		/*
+		
+
 		// uv
-		if (geometry->vertices.size() == geometry->uvs.size()) {
+		if (ModelVertexSize != geometry->uvs.size()) {
 			for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
 				const auto index = geometry->indexes[i];
 				modelVertex[index].uv = geometry->uvs[index];
 			}
 		}
-		else if (geometry->indexes.size() == geometry->uvs.size()) {
+		else /* if (geometry->indexes.size() == geometry->uvs.size()) */ {
 			const size_t uvSize = indexSize;
 			for (size_t i{ 0 }; i < uvSize; ++i) {
 				modelVertex[i].uv = geometry->uvs[i];
 			}
-
 		}
-		*/
 
+		/*
 		auto connectModelId = fbxOO.find(fbxGeometry.first);  // GeometryÇ©ÇÁModelÇéÊìæ
 		// GeometryÇ©ÇÁéÊìæÇµÇΩModelÇ∆MaterialÇ©ÇÁéÊìæÇµÇΩModelÇ…ä‹Ç‹ÇÍÇƒÇ¢ÇÈÇ©åüçı
 		auto connectMaterialId 
@@ -317,7 +338,8 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 			}
 			
 		}
-
+		*/
+		std::cout << "------------------------------" << std::endl;
 		modelData->vertexes.push_back(modelVertex);
 
 		++idx;
