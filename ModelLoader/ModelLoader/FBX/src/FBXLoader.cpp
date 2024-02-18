@@ -205,6 +205,8 @@ namespace model::fbx {
 		std::shared_ptr<FBXNode> parseBinaryFBX(BinaryFile& _bf, long long _version) {
 			std::shared_ptr<FBXNode> result{ new FBXNode{} };
 			result->setName("FBX_ROOT");
+
+			EndString::connectionsStr = { "" };
 			while (!_bf.isEof()) {
 				auto child = readNode(_bf, _version);
 				if (child) {
