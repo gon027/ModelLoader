@@ -109,7 +109,7 @@ namespace model::fbx {
 			// ÉmÅ[Éhñº
 			char nodeName[64]{};
 			_bf.read((char*)&nodeName, sizeof(char) * nodeNameTotalBytes);
-			EndString::connectionsStr = std::string{ nodeName };
+			// EndString::connectionsStr = std::string{ nodeName };
 
 			std::shared_ptr<FBXNode> object{ new FBXNode{} };
 			object->setName(nodeName);
@@ -198,6 +198,7 @@ namespace model::fbx {
 					object->addNode(child);
 				}
 			}
+			EndString::connectionsStr = std::string{ nodeName };
 
 			return object;
 		}
@@ -206,12 +207,13 @@ namespace model::fbx {
 			std::shared_ptr<FBXNode> result{ new FBXNode{} };
 			result->setName("FBX_ROOT");
 
-			EndString::connectionsStr = { "" };
+			EndString::connectionsStr = { "" };  // aa...
 			while (!_bf.isEof()) {
 				auto child = readNode(_bf, _version);
 				if (child) {
 					result->addNode(child);
 				}
+				// EndString::connectionsStr = { "" };
 			}
 
 			return result;
@@ -322,13 +324,13 @@ namespace model::fbx {
 			if (connect == "OO") {
 				auto o1 = getPropertyValue<long long>(child->getProperty(1));
 				auto o2 = getPropertyValue<long long>(child->getProperty(2));
-				oos.insert({ o1, o2 });
+				oos.insert({ o2, o1 });
 			}
 			else if (connect == "OP") {
 				auto o1 = getPropertyValue<long long>(child->getProperty(1));
 				auto o2 = getPropertyValue<long long>(child->getProperty(2));
 				auto diffuseColor = getPropertyValue<std::string>(child->getProperty(3));
-				ops.insert({ o1, o2 });
+				ops.insert({ o2, o1 });
 			}
 			else if (connect == "PO"){
 				++count;

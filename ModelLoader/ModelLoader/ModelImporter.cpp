@@ -217,28 +217,23 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 
 	std::unordered_map<long long, long long> modelMaterialIds{};
 	std::unordered_multimap<long long, long long> materialTextureIds{};
-	/*
-	std::vector<long long> connectMaterialIds{};
-	for (const auto& fbxTexture : fbxTextures) {
-		const auto materialId = fbxOP.find(fbxTexture.first);
-		connectMaterialIds.push_back(materialId->second);
-		materialTextureIds.insert({ materialId->second, fbxTexture.first });
-	}
 
-	std::vector<long long> connectModelIds{};
-	for (const auto& connectMaterialId : connectMaterialIds) {
-		auto a = fbxOO.equal_range(connectMaterialId);
+	size_t cnt{ 0 };
+	for (const auto& material : fbxMaterials) {
+		const auto materialID = material.first;
 
-		std::for_each(a.first, a.second, [&](auto& e) {
-			// std::cout << e.first << " : " << e.second << std::endl;
+		std::cout << "Material ID = " << materialID << std::endl;
+		const auto& propertyList = fbxOP.equal_range(materialID);
+		std::for_each(propertyList.first, propertyList.second, [&](const auto& _id) {
+			std::cout << "    first = " << _id.first << ", second = " << _id.second << std::endl;
 
-			if (fbxModels.contains(e.second)) {
-				connectModelIds.push_back(e.second);
-				modelMaterialIds.insert({ e.second, connectMaterialId });
-			}
+			const auto textureID = fbxTextures.find(_id.second);
+			std::wcout << "      texture = " << textureID->second.fileName << std::endl;
+			materialTextureIds.insert({ materialID, _id.second });
 		});
+
+		std::cout << std::endl;
 	}
-	*/
 
 	size_t idx{ 0 };
 	for (auto& fbxGeometry : fbxGeometrys) {
@@ -287,25 +282,13 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 			}
 		}
 		else /*if (geometry->indexes.size() == geometry->normals.size())*/ {
-			// Ç±Ç¡ÇøÇ©...
-			// í∏ì_ÇÇªÇÃÇ‹Ç‹ó¨ÇµçûÇﬁ
-			// Ç≈ÇÕÇæÇﬂÇ›ÇΩÇ¢...
 			const size_t normalSize = indexSize;
 			for (size_t i{ 0 }; i < normalSize; ++i) {
 
 				modelVertex[i].normal = geometry->normals[i];
 			}
 			std::cout << 1 << std::endl;
-
-			// const size_t normalSize = indexSize;
-			// for (size_t i{ 0 }; i < normalSize; ++i) {
-			// 	const auto indexPointer = geometry->indexes[i];
-			// 	modelVertex[i].normal = geometry->normals[indexPointer];
-			// 	
-			// }
 		}
-
-		
 
 		// uv
 		if (ModelVertexSize != geometry->uvs.size()) {
