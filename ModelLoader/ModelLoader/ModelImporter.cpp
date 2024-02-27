@@ -185,15 +185,6 @@ void ModelImporter::loadModel(const std::string& _name, const std::string& _mode
 
 }
 
-float clamp(float _val, float _min, float _max) {
-	return std::max(std::min(_val, _max), _min);
-}
-
-float comv(float _val) {
-	if (_val < 0) return _val * -1;
-	return _val;
-}
-
 void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDesc)
 {
 	const std::filesystem::path dir{ _modelDesc.modelFileName };
@@ -215,10 +206,8 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 	auto& fbxOO = fbxLoader.getOO();
 	auto& fbxOP = fbxLoader.getOP();
 
-	std::unordered_map<long long, long long> modelMaterialIds{};
-	std::unordered_multimap<long long, long long> materialTextureIds{};
-
-	size_t cnt{ 0 };
+	std::cout << "---- Material Texture ----" << std::endl;
+	std::unordered_multimap<unsigned long long, unsigned long long> materialTextureIds{};
 	for (const auto& material : fbxMaterials) {
 		const auto materialID = material.first;
 
@@ -234,6 +223,35 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 
 		std::cout << std::endl;
 	}
+
+	std::cout << "---- Model Material ----" << std::endl;
+	std::unordered_multimap<unsigned long long, unsigned long long> modelIds{};
+
+	using ModelMap = std::unordered_map<unsigned long long, std::vector<unsigned long long>>;
+	ModelMap modelMap{};
+	for (const auto& model : fbxModels) {
+		const auto modelID = model.first;
+		std::cout << "Model ID = " << modelID << std::endl;
+		const auto& materialObjects = fbxOO.equal_range(modelID);
+
+		unsigned long long geometryID{};
+		std::vector<unsigned long long> materialIDs{};
+		std::for_each(materialObjects.first, materialObjects.second, [&](const auto _id) {
+			std::cout << "  first = " << _id.first << ", second = " << _id.second << std::endl;
+
+			// ƒWƒIƒƒgƒŠŽæ“¾‚µ‚½‚¢
+			if (fbxGeometrys.contains(_id.second)) {
+				geometryID = _id.second;
+			}
+			else {
+				materialIDs.push_back(_id.second);
+			}
+		});
+
+		modelMap.insert({ geometryID, materialIDs });
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
 
 	size_t idx{ 0 };
 	for (auto& fbxGeometry : fbxGeometrys) {
@@ -259,7 +277,7 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 		std::cout << "Model Vertex Size = " << indexSize << std::endl;
 		std::string s{
 			"Vertex Size = " + std::to_string(geometry->vertices.size())
-			+ ", Index Size = " + std::to_string(geometry->indexes.size())
+			// + ", Index Size = " + std::to_string(geometry->indexes.size())
 			+ ", Normal Size = " + std::to_string(geometry->normals.size())
 			+ ", UV Size = " + std::to_string(geometry->uvs.size()) };
 		std::cout << s << std::endl;
@@ -287,42 +305,48 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 
 				modelVertex[i].normal = geometry->normals[i];
 			}
-			std::cout << 1 << std::endl;
+			// std::cout << 1 << std::endl;
 		}
 
 		// uv
 		if (ModelVertexSize != geometry->uvs.size()) {
 			for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
 				const auto index = geometry->indexes[i];
-				modelVertex[index].uv = geometry->uvs[index];
+				modelVertex[i].uv = geometry->uvs[index];
 			}
+
+			
 		}
 		else /* if (geometry->indexes.size() == geometry->uvs.size()) */ {
 			const size_t uvSize = indexSize;
 			for (size_t i{ 0 }; i < uvSize; ++i) {
 				modelVertex[i].uv = geometry->uvs[i];
 			}
-		}
 
-		/*
-		auto connectModelId = fbxOO.find(fbxGeometry.first);  // Geometry‚©‚çModel‚ðŽæ“¾
-		// Geometry‚©‚çŽæ“¾‚µ‚½Model‚ÆMaterial‚©‚çŽæ“¾‚µ‚½Model‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é‚©ŒŸõ
-		auto connectMaterialId 
-			= std::find(connectModelIds.begin(), connectModelIds.end(), connectModelId->second);
-		if (connectMaterialId != connectModelIds.end()) {
-			const auto id = *connectMaterialId;
-			const auto materialId = modelMaterialIds[id];  // MaterialŽæ“¾
-
-			auto aaa = materialTextureIds.find(materialId);
-
-			if (fbxTextures.contains(aaa->second)) {
-				modelData->materials[idx].textureName 
-					= parentDir.generic_wstring() + L"/" + fbxTextures[aaa->second].fileName;
+			for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
+				std::cout << "[x = " << modelVertex[i].uv.x
+					<< ", y = " << modelVertex[i].uv.y << "]" << std::endl;;
 			}
-			
 		}
-		*/
-		std::cout << "------------------------------" << std::endl;
+
+		const auto& materialIDs = modelMap.find(fbxGeometry.first)->second;
+		for (const auto& materialId : materialIDs) {
+			if (!fbxMaterials.contains(materialId)) {
+				continue;
+			}
+
+			if (!materialTextureIds.contains(materialId)) {
+				continue;
+			}
+
+			const auto& textureId = materialTextureIds.find(materialId)->second;
+			const auto& texture = fbxTextures.find(textureId)->second;
+			if (texture.surfaceMaterial == "Maya|DiffuseTexture") {
+				modelData->materials[idx].textureName = L"C:/Users/tk08g/source/repos/Engine/Asset/FBXModel/" + texture.fileName;
+			}
+		}
+		std::cout << std::endl;
+
 		modelData->vertexes.push_back(modelVertex);
 
 		++idx;

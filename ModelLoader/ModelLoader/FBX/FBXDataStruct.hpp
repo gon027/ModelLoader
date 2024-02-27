@@ -115,6 +115,7 @@ namespace model::fbx {
 
 	struct FBXTexture {
 		std::wstring fileName;
+		std::string surfaceMaterial;
 	};
 
 	struct FBXModel {

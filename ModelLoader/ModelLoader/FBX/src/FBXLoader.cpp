@@ -3,8 +3,9 @@
 #include "../../BinaryFile/BinaryFile.hpp"
 #include <unordered_map>
 #include <filesystem>
+#include "../../Utility/StringUtility.hpp"
 
- #include <Windows.h>
+#include <Windows.h>
 #include <iostream>
 
 namespace model::fbx {
@@ -331,6 +332,10 @@ namespace model::fbx {
 				auto o2 = getPropertyValue<long long>(child->getProperty(2));
 				auto diffuseColor = getPropertyValue<std::string>(child->getProperty(3));
 				ops.insert({ o2, o1 });
+
+				if (fbxTextures.contains(o1)) {
+					fbxTextures[o1].surfaceMaterial = diffuseColor;
+				}
 			}
 			else if (connect == "PO"){
 				++count;
@@ -672,6 +677,7 @@ namespace model::fbx {
 		// uvs
 		std::unordered_map<int, std::vector<std::vector<Vertex2>>> uvs{};
 		{
+			size_t countIdx{ 0 };
 			int uvId{ 0 };
 			for (auto& mesh : meshes) {
 				auto layerElementUVNodes = mesh->findNodes("LayerElementUV");
@@ -698,6 +704,7 @@ namespace model::fbx {
 					}
 					else if (mappingInfomationType == "ByPolygonVertex") {
 						if (referenceInformationType == "Direct") {
+							OutputDebugString(L"ByPolygonVertex::Direct ");
 							std::vector<Vertex2> retUvs(uvSize / 2);
 							// for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
 							// 	const auto uvIdx = idx / 2;
@@ -707,6 +714,7 @@ namespace model::fbx {
 							uvList.push_back(retUvs);
 						}
 						else if (referenceInformationType == "IndexToDirect") {
+							OutputDebugString(L"ByPolygonVertex::IndexToDirect ");
 							auto uvIndexProp = layerElementUvNode->findNode("UVIndex");
 							std::vector<int> uvIndexVec = std::move(getPropertyValue<std::vector<int>>(uvIndexProp->getProperty(0)));
 							const size_t uvIndexVecSize = uvIndexVec.size();
@@ -715,20 +723,84 @@ namespace model::fbx {
 							OutputDebugString(s.c_str());
 
 							std::vector<Vertex2> tmpUvs(uvSize / 2);
-							// for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
-							// 	const auto uvIdx = idx / 2;
-							// 	tmpUvs[uvIdx].x = static_cast<float>(uvVec[uvIdx + 0]);
-							// 	tmpUvs[uvIdx].y = static_cast<float>(uvVec[uvIdx + 1]);
-							// }
+							for (size_t idx{ 0 }; idx < uvSize; idx += 2) {
+								const auto uvIdx = idx / 2;
+								tmpUvs[uvIdx].x = static_cast<float>(uvVec[idx + 0]);
+								tmpUvs[uvIdx].y = static_cast<float>(uvVec[idx + 1]);
+							}
 							// uvList.push_back(tmpUvs);
 
-							// const auto maxUvSize = max(tmpUvs.size(), uvIndexVec.size());
-							const auto maxUvSize = uvIndexVecSize;
-							std::vector<Vertex2> retUvs(maxUvSize);
-							//for (size_t idx{0}; idx < maxUvSize; ++idx) {
-							//	retUvs[idx] = tmpUvs[uvIndexVec[idx]];
-							//}
-							uvList.push_back(retUvs);
+							const auto aaa = indeies[countIdx].size();
+							if (uvIndexVec.size() != aaa) {
+								// uvIndex‚ðindex‚É‡‚í‚¹‚éH
+								auto indexProp = mesh->findNode("PolygonVertexIndex");
+								if (!indexProp) {
+									indexProp = mesh->findNode("Indexes");
+									if (!indexProp) return;
+								}
+								const auto indexVec = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
+								const size_t indexVecSize{ indexVec.size() };
+
+								// uvIndex‚ÌŠg’£
+								const size_t maxIndexSize{ indeies[countIdx].size() };
+								std::vector<int> exUvIndexVec(maxIndexSize);
+								size_t newItrExUvIndex{ 0 };
+								size_t oldItrUvIndex{ 0 };
+								int countToNegativeIndex{ 0 };
+								while (newItrExUvIndex < maxIndexSize) {
+									int currentIdx = indexVec[oldItrUvIndex];
+									++countToNegativeIndex;
+
+									if (currentIdx < 0) {
+										const auto uvStorageLoopCount = countToNegativeIndex - 3;
+
+										if (uvStorageLoopCount == 0) {
+											exUvIndexVec[newItrExUvIndex] = uvIndexVec[oldItrUvIndex];
+											++newItrExUvIndex;
+											++oldItrUvIndex;
+										}
+										else {
+											for (size_t _{ 0 }; _ < uvStorageLoopCount; ++_) {
+												exUvIndexVec[newItrExUvIndex + 0] = exUvIndexVec[newItrExUvIndex - 3];
+												exUvIndexVec[newItrExUvIndex + 1] = exUvIndexVec[newItrExUvIndex - 1];
+												exUvIndexVec[newItrExUvIndex + 2] = uvIndexVec[oldItrUvIndex];
+												newItrExUvIndex += 3;
+												++oldItrUvIndex;
+											}
+										}
+										countToNegativeIndex = 0;
+									}
+									else {
+										exUvIndexVec[newItrExUvIndex] = uvIndexVec[oldItrUvIndex];
+										++newItrExUvIndex;
+										++oldItrUvIndex;
+									}
+								}
+
+								const auto newUvSize{ maxIndexSize };
+								std::vector<Vertex2> retUvs(newUvSize);
+								for (size_t idx{ 0 }; idx < newUvSize; ++idx) {
+									// retUvs[idx] = tmpUvs[exUvIndexVec[idx]];
+								}
+								uvList.push_back(retUvs);
+							}
+							else {
+								const auto newUvSize{ uvIndexVecSize };
+								std::vector<Vertex2> retUvs(newUvSize);
+								for (size_t idx{ 0 }; idx < newUvSize; ++idx) {
+									retUvs[idx] = tmpUvs[uvIndexVec[idx]];
+								}
+								uvList.push_back(retUvs);
+							}
+
+							// const auto newUvSize{ uvIndexVecSize };
+							// std::vector<Vertex2> retUvs(newUvSize);
+							// size_t newIdx{ 0 };
+							// while (newIdx < uvIndexVecSize) {
+							// 	retUvs[newIdx] = tmpUvs[uvIndexVec[newIdx]];
+							// 	++newIdx;
+							// }
+							// uvList.push_back(retUvs);
 							
 						}
 					}
@@ -736,6 +808,7 @@ namespace model::fbx {
 
 				uvs.insert({ uvId, uvList });
 				++uvId;
+				++countIdx;
 			}
 		}
 
