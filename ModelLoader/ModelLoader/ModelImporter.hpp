@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include "ModelData.hpp"
+#include "include/ModelData.hpp"
 
 #ifdef DEF_SINGLETON
 
@@ -42,10 +42,6 @@ class ModelImporter : public Singleton<ModelImporter> {
 	friend Singleton<ModelImporter>;
 
 public:
-	void loadModel(const std::string& _name, const ModelDesc& _modelDesc);
-
-	void loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);
-
 	void loadPMX(const std::string& _name, const ModelDesc& _modelDesc);
 
 	void loadPMD(const std::string& _name, const ModelDesc& _modelDesc);
@@ -53,8 +49,6 @@ public:
 	void loadFBX(const std::string& _name, const ModelDesc& _modelDesc);
 
 	ModelDataPtr getModelData(const std::string& _name);
-
-	ModelDataPtr getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile);
 
 protected:
 	ModelImporter();

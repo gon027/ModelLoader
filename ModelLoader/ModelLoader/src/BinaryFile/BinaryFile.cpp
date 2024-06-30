@@ -1,4 +1,4 @@
-#include "BinaryFile.hpp"
+#include "../../include/BinaryFile/BinaryFile.hpp"
 #include <Windows.h>
 
 BinaryFile::BinaryFile()

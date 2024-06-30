@@ -1,10 +1,8 @@
-#include "../PMXLoader.hpp"
-
+#include "../../include/PMX/PMXLoader.hpp"
 #include <fstream>
 #include <string>
 #include <variant>
-
-#include "../../Utility/StringUtility.hpp"
+#include "../../include/Utility/StringUtility.hpp"
 
 namespace model::pmx {
 

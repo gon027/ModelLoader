@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../ModelLoader.hpp"
 #include "../ModelData.hpp"
+#include "../ModelLoader.hpp"
 #include "PMDFile.hpp"
 
 namespace model::pmd {

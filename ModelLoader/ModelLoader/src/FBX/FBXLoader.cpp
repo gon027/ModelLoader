@@ -1,9 +1,9 @@
-#include "../FBXLoader.hpp"
-#include <zlib/zlib.h>
-#include "../../BinaryFile/BinaryFile.hpp"
+#include "../../include/FBX/FBXLoader.hpp"
 #include <unordered_map>
 #include <filesystem>
-#include "../../Utility/StringUtility.hpp"
+#include <zlib/zlib.h>
+#include "../../include/BinaryFile/BinaryFile.hpp"
+#include "../../include/Utility/StringUtility.hpp"
 
 #include <Windows.h>
 #include <iostream>
@@ -780,7 +780,7 @@ namespace model::fbx {
 								const auto newUvSize{ maxIndexSize };
 								std::vector<Vertex2> retUvs(newUvSize);
 								for (size_t idx{ 0 }; idx < newUvSize; ++idx) {
-									// retUvs[idx] = tmpUvs[exUvIndexVec[idx]];
+									retUvs[idx] = tmpUvs[exUvIndexVec[idx]];
 								}
 								uvList.push_back(retUvs);
 							}
@@ -792,16 +792,6 @@ namespace model::fbx {
 								}
 								uvList.push_back(retUvs);
 							}
-
-							// const auto newUvSize{ uvIndexVecSize };
-							// std::vector<Vertex2> retUvs(newUvSize);
-							// size_t newIdx{ 0 };
-							// while (newIdx < uvIndexVecSize) {
-							// 	retUvs[newIdx] = tmpUvs[uvIndexVec[newIdx]];
-							// 	++newIdx;
-							// }
-							// uvList.push_back(retUvs);
-							
 						}
 					}
 				}

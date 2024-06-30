@@ -27,72 +27,78 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp">
+    <ClCompile Include="ModelLoader\src\PMD\PMDLoader.cpp">
       <Filter>PMD</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp">
+    <ClCompile Include="ModelLoader\src\PMX\PMXLoader.cpp">
       <Filter>PMX</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoader\ModelImporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\BinaryFile\BinaryFile.cpp">
+    <ClCompile Include="ModelLoader\src\BinaryFile\BinaryFile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\FBX\src\FBXLoader.cpp">
+    <ClCompile Include="ModelLoader\src\FBX\FBXLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\FBX\src\FBXDataStruct.cpp">
+    <ClCompile Include="ModelLoader\src\FBX\FBXDataStruct.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader\Debug\Debug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ModelLoader\ModelLoader.hpp">
+    <ClInclude Include="ModelLoader\include\ModelLoader.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp">
+    <ClInclude Include="ModelLoader\include\PMX\PMXDataStruct.hpp">
       <Filter>PMX</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp">
+    <ClInclude Include="ModelLoader\include\PMD\PMDDataStruct.hpp">
       <Filter>PMD</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\PMX\PMXFile.hpp">
+    <ClInclude Include="ModelLoader\include\PMX\PMXFile.hpp">
       <Filter>PMX</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\PMD\PMDFile.hpp">
+    <ClInclude Include="ModelLoader\include\PMD\PMDFile.hpp">
       <Filter>PMD</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp">
+    <ClInclude Include="ModelLoader\include\FBX\FBXDataStruct.hpp">
       <Filter>FBX</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\PMD\PMDLoader.hpp">
+    <ClInclude Include="ModelLoader\include\PMD\PMDLoader.hpp">
       <Filter>PMD</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp">
+    <ClInclude Include="ModelLoader\include\PMX\PMXLoader.hpp">
       <Filter>PMX</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\ModelData.hpp">
+    <ClInclude Include="ModelLoader\include\ModelData.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader\ModelImporter.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\FBX\FBXLoader.hpp">
+    <ClInclude Include="ModelLoader\include\FBX\FBXLoader.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\Utility\StringUtility.hpp">
+    <ClInclude Include="ModelLoader\include\Utility\StringUtility.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader\ModelHeader.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\BinaryFile\BinaryFile.hpp">
+    <ClInclude Include="ModelLoader\include\BinaryFile\BinaryFile.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\FBX\FBXProperty.hpp">
+    <ClInclude Include="ModelLoader\include\FBX\FBXProperty.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\Vertex\Vertex.hpp">
+    <ClInclude Include="ModelLoader\include\Vertex\Vertex.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader\Debug\Debug.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

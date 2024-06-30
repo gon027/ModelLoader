@@ -149,30 +149,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ModelLoader\BinaryFile\BinaryFile.cpp" />
-    <ClCompile Include="ModelLoader\FBX\src\FBXDataStruct.cpp" />
-    <ClCompile Include="ModelLoader\FBX\src\FBXLoader.cpp" />
+    <ClCompile Include="ModelLoader\src\BinaryFile\BinaryFile.cpp" />
+    <ClCompile Include="ModelLoader\Debug\Debug.cpp" />
+    <ClCompile Include="ModelLoader\src\FBX\FBXDataStruct.cpp" />
+    <ClCompile Include="ModelLoader\src\FBX\FBXLoader.cpp" />
     <ClCompile Include="ModelLoader\ModelImporter.cpp" />
-    <ClCompile Include="ModelLoader\PMD\src\PMDLoader.cpp" />
-    <ClCompile Include="ModelLoader\PMX\src\PMXLoader.cpp" />
+    <ClCompile Include="ModelLoader\src\PMD\PMDLoader.cpp" />
+    <ClCompile Include="ModelLoader\src\PMX\PMXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ModelLoader\BinaryFile\BinaryFile.hpp" />
-    <ClInclude Include="ModelLoader\FBX\FBXLoader.hpp" />
-    <ClInclude Include="ModelLoader\FBX\FBXProperty.hpp" />
-    <ClInclude Include="ModelLoader\ModelData.hpp" />
-    <ClInclude Include="ModelLoader\FBX\FBXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\include\BinaryFile\BinaryFile.hpp" />
+    <ClInclude Include="ModelLoader\Debug\Debug.hpp" />
+    <ClInclude Include="ModelLoader\include\FBX\FBXLoader.hpp" />
+    <ClInclude Include="ModelLoader\include\FBX\FBXProperty.hpp" />
+    <ClInclude Include="ModelLoader\include\ModelData.hpp" />
+    <ClInclude Include="ModelLoader\include\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\ModelHeader.hpp" />
     <ClInclude Include="ModelLoader\ModelImporter.hpp" />
-    <ClInclude Include="ModelLoader\ModelLoader.hpp" />
-    <ClInclude Include="ModelLoader\PMD\PMDDataStruct.hpp" />
-    <ClInclude Include="ModelLoader\PMD\PMDFile.hpp" />
-    <ClInclude Include="ModelLoader\PMD\PMDLoader.hpp" />
-    <ClInclude Include="ModelLoader\PMX\PMXDataStruct.hpp" />
-    <ClInclude Include="ModelLoader\PMX\PMXFile.hpp" />
-    <ClInclude Include="ModelLoader\PMX\PMXLoader.hpp" />
-    <ClInclude Include="ModelLoader\Utility\StringUtility.hpp" />
-    <ClInclude Include="ModelLoader\Vertex\Vertex.hpp" />
+    <ClInclude Include="ModelLoader\include\ModelLoader.hpp" />
+    <ClInclude Include="ModelLoader\include\PMD\PMDDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\include\PMD\PMDFile.hpp" />
+    <ClInclude Include="ModelLoader\include\PMD\PMDLoader.hpp" />
+    <ClInclude Include="ModelLoader\include\PMX\PMXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\include\PMX\PMXFile.hpp" />
+    <ClInclude Include="ModelLoader\include\PMX\PMXLoader.hpp" />
+    <ClInclude Include="ModelLoader\include\Utility\StringUtility.hpp" />
+    <ClInclude Include="ModelLoader\include\Vertex\Vertex.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\zlib\zlib\zlib.vcxproj">

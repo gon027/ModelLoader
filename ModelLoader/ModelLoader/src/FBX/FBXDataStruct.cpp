@@ -1,4 +1,4 @@
-#include "../FBXDataStruct.hpp"
+#include "../../include/FBX/FBXDataStruct.hpp"
 
 namespace model::fbx {
 

@@ -1,13 +1,13 @@
 #include "ModelImporter.hpp"
 
-#include "PMD/PMDFile.hpp"
-#include "PMX/PMXFile.hpp"
-#include "ModelLoader.hpp"
-#include "PMD/PMDLoader.hpp"
-#include "PMX/PMXLoader.hpp"
-#include "Utility/StringUtility.hpp"
-#include "FBX/FBXLoader.hpp"
-#include "Vertex/Vertex.hpp"
+#include "include/PMD/PMDFile.hpp"
+#include "include/PMX/PMXFile.hpp"
+#include "include/ModelLoader.hpp"
+#include "include/PMD/PMDLoader.hpp"
+#include "include/PMX/PMXLoader.hpp"
+#include "include/Utility/StringUtility.hpp"
+#include "include/FBX/FBXLoader.hpp"
+#include "include/Vertex/Vertex.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -15,6 +15,14 @@
 #include <filesystem>
 
 namespace {
+
+	model::Vertex3 toVertex3(const float _origin[3]) {
+		return { _origin[0], _origin[1], _origin[2] };
+	}
+
+	model::Vertex2 toVertex2(const float _origin[2]) {
+		return { _origin[0], _origin[1] };
+	}
 
 	// PMDの形式からModelDataの形式に変換
 	void convertPMDToModelData(ModelDataPtr& _modelData, const model::pmd::PMDFile& _pmdFile) {
@@ -74,21 +82,30 @@ namespace {
 		_modelData->modelName = util::getWString(_pmxFile.modelInfo.modelName);
 
 		// クラスの変更のため、一時的コメントアウト
-		/*
 		{
-			size_t vertexSize = _pmxFile.vertexes.size();
-			_modelData->vertexes.resize(vertexSize);
-			for (size_t i{ 0 }; i < vertexSize; ++i) {
-				std::memcpy(_modelData->vertexes[i].position, _pmxFile.vertexes[i].position, sizeof(_pmxFile.vertexes[i].position));
-				std::memcpy(_modelData->vertexes[i].normal, _pmxFile.vertexes[i].normal, sizeof(_pmxFile.vertexes[i].normal));
-				std::memcpy(_modelData->vertexes[i].uv, _pmxFile.vertexes[i].uv, sizeof(_pmxFile.vertexes[i].uv));
+			const size_t vertexSize = _pmxFile.vertexes.size();
+			_modelData->vertexes.resize(1);
+			for (size_t i{ 0 }; i < 1; ++i) {
+				_modelData->vertexes[i].resize(vertexSize);
+				auto& vertex = _modelData->vertexes[i];
+				for (size_t idx{ 0 }; idx < vertexSize; ++idx) {
+					vertex[idx].position = toVertex3(_pmxFile.vertexes[idx].position);
+					vertex[idx].normal = toVertex3(_pmxFile.vertexes[idx].normal);
+					vertex[idx].uv = toVertex2(_pmxFile.vertexes[idx].uv);
+				}
 			}
 		}
-
+		
 		{
-			size_t indexSize = _pmxFile.indexes.size();
-			_modelData->indexes.resize(indexSize);
-			std::copy(_pmxFile.indexes.begin(), _pmxFile.indexes.end(), _modelData->indexes.begin());
+			const size_t indexSize = _pmxFile.indexes.size();
+			_modelData->indexes.resize(1);
+			for (size_t i{ 0 }; i < 1; ++i) {
+				_modelData->indexes[i].resize(indexSize);
+				auto& indexes = _modelData->indexes[i];
+				for (size_t idx{ 0 }; idx < indexSize; ++idx) {
+					indexes[idx] = _pmxFile.indexes[idx];
+				}
+			}
 		}
 
 		const size_t MaterialSize = _pmxFile.materials.size();
@@ -145,7 +162,6 @@ namespace {
 				}
 			}
 		}
-		*/
 	}
 }
 
@@ -154,35 +170,40 @@ ModelImporter::ModelImporter()
 {
 }
 
-void ModelImporter::loadModel(const std::string& _name, const ModelDesc& _modelDesc)
+void ModelImporter::loadPMX(const std::string& _name, const ModelDesc& _modelDesc)
 {
-	loadModel(_name, _modelDesc.modelDirectoy, _modelDesc.modelFileName);
+	const std::string extension = util::getExtension(_modelDesc.modelFileName);
+	if (extension != "pmx") {
+		return;
+	}
+
+	model::pmx::PMXLoader pmxLoader{};
+	if (!pmxLoader.load(_modelDesc.modelDirectoy, _modelDesc.modelFileName)) {
+		return;
+	}
+
+	ModelDataPtr modelData{ new model::ModelData{} };
+	convertPMXToModelData(modelData, pmxLoader.getFile());
+
+	modelList.emplace(_name, modelData);
 }
 
-void ModelImporter::loadModel(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile)
+void ModelImporter::loadPMD(const std::string& _name, const ModelDesc& _modelDesc)
 {
-	std::string extension = util::getExtension(_modelFile);
-
-	if (extension == "pmd") {
-		model::pmd::PMDLoader pmdLoader{};
-		pmdLoader.load(_modelDir, _modelFile);
-
-		ModelDataPtr modelData{ new model::ModelData{} };
-		convertPMDToModelData(modelData, pmdLoader.getFile());
-
-		modelList.emplace(_name, modelData);
+	const std::string extension = util::getExtension(_modelDesc.modelFileName);
+	if (extension != "pmd") {
+		return;
 	}
 
-	if (extension == "pmx") {
-		model::pmx::PMXLoader pmxLoader{};
-		pmxLoader.load(_modelDir, _modelFile);
-
-		ModelDataPtr modelData{ new model::ModelData{} };
-		convertPMXToModelData(modelData, pmxLoader.getFile());
-
-		modelList.emplace(_name, modelData);
+	model::pmd::PMDLoader pmdLoader{};
+	if (!pmdLoader.load(_modelDesc.modelDirectoy, _modelDesc.modelFileName)) {
+		return;
 	}
 
+	ModelDataPtr modelData{ new model::ModelData{} };
+	convertPMDToModelData(modelData, pmdLoader.getFile());
+
+	modelList.emplace(_name, modelData);
 }
 
 void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDesc)
@@ -379,15 +400,6 @@ ModelDataPtr ModelImporter::getModelData(const std::string& _name)
 {
 	if (!modelList.contains(_name)) {
 		return nullptr;
-	}
-
-	return modelList[_name];
-}
-
-ModelDataPtr ModelImporter::getModelData(const std::string& _name, const std::string& _modelDir, const std::string& _modelFile)
-{
-	if (!modelList.contains(_name)) {
-		loadModel(_name, _modelDir, _modelFile);
 	}
 
 	return modelList[_name];
