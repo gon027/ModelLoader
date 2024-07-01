@@ -329,16 +329,15 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 			// std::cout << 1 << std::endl;
 		}
 
+		/*
 		// uv
 		if (ModelVertexSize != geometry->uvs.size()) {
 			for (size_t i{ 0 }; i < geometry->indexes.size(); ++i) {
 				const auto index = geometry->indexes[i];
 				modelVertex[i].uv = geometry->uvs[index];
 			}
-
-			
 		}
-		else /* if (geometry->indexes.size() == geometry->uvs.size()) */ {
+		else /* if (geometry->indexes.size() == geometry->uvs.size())  {
 			const size_t uvSize = indexSize;
 			for (size_t i{ 0 }; i < uvSize; ++i) {
 				modelVertex[i].uv = geometry->uvs[i];
@@ -349,6 +348,7 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 					<< ", y = " << modelVertex[i].uv.y << "]" << std::endl;;
 			}
 		}
+		*/
 
 		const auto& materialIDs = modelMap.find(fbxGeometry.first)->second;
 		for (const auto& materialId : materialIDs) {

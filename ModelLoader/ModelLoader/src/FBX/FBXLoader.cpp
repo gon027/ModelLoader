@@ -444,7 +444,7 @@ namespace model::fbx {
 		}
 
 		// Index
-		std::vector<std::vector<uint16_t>> indeies{};
+		std::vector<std::vector<uint32_t>> indeies{};
 		{
 			int ccc{ 0 };
 			for (auto& mesh : meshes) {
@@ -459,7 +459,7 @@ namespace model::fbx {
 					}
 				}
 
-				std::vector<uint16_t> tmpIndex{};
+				std::vector<uint32_t> tmpIndex{};
 				size_t tmpIndexSize{ 0 };
 				size_t currentTmpIndexPosition{ 0 };
 				auto index = getPropertyValue<std::vector<int>>(indexProp->getProperty(0));
@@ -483,7 +483,7 @@ namespace model::fbx {
 								const size_t currentIdx = idx + i;
 								tmpIndex[currentTmpIndexPosition] = index[currentIdx];
 								if (index[currentIdx] < 0) {
-									uint16_t pulsIndex = ~index[currentIdx];
+									uint32_t pulsIndex = ~index[currentIdx];
 									tmpIndex[currentTmpIndexPosition] = pulsIndex;
 								}
 								++currentTmpIndexPosition;
@@ -510,7 +510,7 @@ namespace model::fbx {
 								tmpIndex[currentTmpIndexPosition + 1] = tmpIndex[currentTmpIndexPosition - 1];
 
 								if (index[currentIdx] < 0) {
-									uint16_t pulsIndex = ~index[currentIdx];  // 2^16ˆÈã‚Ç‚¤‚µ‚æ...?
+									uint32_t pulsIndex = ~index[currentIdx];  // 2^16ˆÈã‚Ç‚¤‚µ‚æ...?
 									tmpIndex[currentTmpIndexPosition + 2] = pulsIndex;
 								}
 								else {
@@ -651,7 +651,6 @@ namespace model::fbx {
 											++oldNormalIndex;
 										}
 									}
-
 									toNegativeIndexCount = 0;
 								}
 								else {

@@ -98,7 +98,7 @@ namespace model::fbx {
 
 	struct FBXGeometry {
 		std::vector<Vertex3> vertices;
-		std::vector<uint16_t> indexes;
+		std::vector<uint32_t> indexes;
 		std::vector<int> edges;
 		std::vector<Vertex3> normals;
 		std::vector<Vertex2> uvs;
