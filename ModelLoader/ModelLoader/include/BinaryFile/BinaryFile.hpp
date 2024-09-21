@@ -25,15 +25,25 @@ public:
 
 	double readDouble();
 
-	long long getPosition() const {
-		return position;
-	}
+	void seek(std::streamsize _pos);
 
 	bool isOpen() const;
 
 	bool isFail() const;
 
 	bool isEof() const;
+
+	inline long long getPosition() const {
+		return position;
+	}
+
+	inline long long getSize() const {
+		return size;
+	}
+
+	inline long long getTellg() {
+		return ifs.tellg();
+	}
 
 private:
 	BinaryFile(const BinaryFile&);
@@ -42,4 +52,5 @@ private:
 private:
 	std::ifstream ifs;
 	long long position;
+	long long size;
 };

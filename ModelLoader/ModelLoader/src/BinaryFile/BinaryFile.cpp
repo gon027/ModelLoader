@@ -1,21 +1,38 @@
 #include "../../include/BinaryFile/BinaryFile.hpp"
+#include <iostream>
 #include <Windows.h>
 
 BinaryFile::BinaryFile()
 	: ifs{}
-	, position()
+	, position{ 0 }
+	, size{ 0 }
 {
 }
 
 BinaryFile::BinaryFile(const std::string _filePath)
 	: ifs{ _filePath, std::ios::in | std::ios::binary }
-	, position()
+	, position{ 0 }
+	, size{ 0 }
 {
+	// バイト数の計算
+	ifs.seekg(0, std::ios_base::end);
+	{
+		size = ifs.tellg();
+	}
+	ifs.seekg(0, std::ios_base::beg);
 }
 
 bool BinaryFile::open(const std::string& _filePath)
 {
 	ifs.open(_filePath, std::ios::in | std::ios::binary);
+
+	// バイト数の計算
+	ifs.seekg(0, std::ios_base::end);
+	{
+		size = ifs.tellg();
+	}
+	ifs.seekg(0, std::ios_base::beg);
+
 	return isOpen();
 }
 
@@ -71,6 +88,12 @@ double BinaryFile::readDouble()
 	ifs.read((char*)&value, sizeof(char) * 8);
 	position += sizeof(char) * 8;
 	return value;
+}
+
+void BinaryFile::seek(std::streamsize _pos)
+{
+	ifs.seekg(_pos);
+	position = _pos;
 }
 
 bool BinaryFile::isOpen() const
