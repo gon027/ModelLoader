@@ -12,10 +12,6 @@ namespace model::fbx {
 
 	namespace {
 
-		namespace EndString {
-			std::string connectionsStr{""};
-		}
-
 		unsigned char* inflateData(const char* _inData, unsigned long long _elem, unsigned long long _byte, unsigned long long _typeSize) {
 			z_stream zs{};
 			zs.zalloc = Z_NULL;
@@ -101,16 +97,27 @@ namespace model::fbx {
 			if (dist == 0 && attributeNum == 0 && attributeTotalBytes == 0 && nodeNameTotalBytes == 0) {
 				return nullptr;
 			}
-			else {
-				// Todo: 16バイトのデータをなんとかしたい...
-				if (EndString::connectionsStr == "Connections") return nullptr;
-			}
-
 
 			// ノード名
 			char nodeName[64]{};
 			_bf.read((char*)&nodeName, sizeof(char) * nodeNameTotalBytes);
 			// EndString::connectionsStr = std::string{ nodeName };
+			//std::cout << nodeName << std::endl;
+			std::string nodeNameStr{ nodeName };
+			if (nodeNameStr == "Takes") {
+				int a = 0;
+				// _bf.seek(dist);
+				// return nullptr;
+			}
+
+			std::cout
+				<< "ifsPosition = " << _bf.getPosition()
+				<< ", calcPosition = " << _bf.getTellg()
+				<< ", dist = " << dist
+				<< ", attributeNum = " << attributeNum
+				<< ", attributeTotalBytes = " << attributeTotalBytes
+				<< ", nodeNameTotalBytes = " << (int)nodeNameTotalBytes 
+				<< ", nodeName = " << nodeName << std::endl;
 
 			std::shared_ptr<FBXNode> object{ new FBXNode{} };
 			object->setName(nodeName);
@@ -187,19 +194,26 @@ namespace model::fbx {
 
 			// 子ノードがあり、nullptrではなければ
 			while (_bf.getPosition() < dist) {
-				std::string a{ 
-					"position = " + std::to_string(_bf.getPosition()) 
+				std::string before{ 
+					"before = ifsPosition = " + std::to_string(_bf.getPosition())
+					+ ", calcPosition = " + std::to_string(_bf.getTellg()) 
 					+ ", dist = " + std::to_string(dist) 
 					+ ", nodeName = " + std::string{ nodeName }
 				};
-				// std::cout << a << std::endl;
+				std::cout << before << std::endl;
 				// OutputDebugString(std::wstring{ a }.c_str());
 				auto child = readNode(_bf, _version);
+				std::string after{
+					"after = ifsPosition = " + std::to_string(_bf.getPosition())
+					+ ", calcPosition = " + std::to_string(_bf.getTellg())
+					+ ", dist = " + std::to_string(dist)
+					+ ", nodeName = " + std::string{ nodeName }
+				};
+				std::cout << after << std::endl;
 				if (child) {
 					object->addNode(child);
 				}
 			}
-			EndString::connectionsStr = std::string{ nodeName };
 
 			return object;
 		}
@@ -208,15 +222,16 @@ namespace model::fbx {
 			std::shared_ptr<FBXNode> result{ new FBXNode{} };
 			result->setName("FBX_ROOT");
 
-			EndString::connectionsStr = { "" };  // aa...
-			while (!_bf.isEof()) {
+			while (_bf.getPosition() != _bf.getSize()) {
 				auto child = readNode(_bf, _version);
 				if (child) {
 					result->addNode(child);
-				}
-				// EndString::connectionsStr = { "" };
-			}
 
+					if (child->getNodeName() == "Takes") {
+						break;
+					}
+				}
+			}
 			return result;
 		}
 	}
@@ -236,31 +251,34 @@ namespace model::fbx {
 	{
 		BinaryFile bf{};
 		bf.open(_modelDir);
+		std::cout << "file size = " << bf.getSize() << std::endl;
 		if (bf.isFail()) {
 			return false;
 		}
 
 		char magicNumber[32];
 		bf.read(magicNumber, sizeof(char) * 23);
-		//std::cout << "マジックナンバー : " << magicNumber << std::endl;
+		std::cout << "マジックナンバー : " << magicNumber << std::endl;
 
 		version = bf.read32();
-		//std::cout << "バージョン : " << version << std::endl;
+		std::cout << "バージョン : " << version << std::endl;
+		std::cout << "file Position = " << bf.getPosition() << std::endl;
+		std::cout << "現在の読み取り位置 = " << bf.getTellg() << std::endl;
 
 		rootNode = parseBinaryFBX(bf, version);
 		if (!rootNode) return false;
 
-		createFbxScene();
+		//createFbxScene();
 
-		createFBXGeometry();
+		//createFBXGeometry();
 
-		createFbxTexture();
+		//createFbxTexture();
 
-		createMaterial();
+		//createMaterial();
 
-		createModel();
+		//createModel();
 
-		createConnections();
+		//createConnections();
 
 		return true;
 	}
@@ -268,21 +286,18 @@ namespace model::fbx {
 	void FBXLoader::createFbxScene()
 	{
 		// GlobalSettingの取得
-		{
-			auto gSetting = rootNode->findNode("GlobalSettings")->findNode("Properties70");
-			if (!gSetting) {
-				return;
-			}
-
-			// FBXGlobalSetting globalSettings{};
-			globalSetting->upAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxis"));
-			globalSetting->upAxisSing = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxisSign"));
-			globalSetting->frontAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxis"));
-			globalSetting->frontAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxisSign"));
-			globalSetting->coordAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxis"));
-			globalSetting->coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
+		auto gSetting = rootNode->findNode("GlobalSettings")->findNode("Properties70");
+		if (!gSetting) {
+			return;
 		}
 
+		// FBXGlobalSetting globalSettings{};
+		globalSetting->upAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxis"));
+		globalSetting->upAxisSing = getPropertyValue<int>(gSetting->findPropertyForChildren("UpAxisSign"));
+		globalSetting->frontAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxis"));
+		globalSetting->frontAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("FrontAxisSign"));
+		globalSetting->coordAxis = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxis"));
+		globalSetting->coordAxisSign = getPropertyValue<int>(gSetting->findPropertyForChildren("CoordAxisSign"));
 	}
 
 	void FBXLoader::createFbxTexture()
@@ -290,7 +305,6 @@ namespace model::fbx {
 		auto objects = rootNode->findNode("Objects");
 		// テクスチャ
 		auto textures = objects->findNodes("Texture");
-		// std::vector<FBXTexture> textureList{};
 		for (auto& texture : textures) {
 			// auto textureNameProp = texture->findNode("TextureName");
 			// if (!textureNameProp) continue;
