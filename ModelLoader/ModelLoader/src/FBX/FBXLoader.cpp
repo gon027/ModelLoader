@@ -12,6 +12,8 @@ namespace model::fbx {
 
 	namespace {
 
+		const std::string exitReadNodeName{ "Takes" };
+
 		unsigned char* inflateData(const char* _inData, unsigned long long _elem, unsigned long long _byte, unsigned long long _typeSize) {
 			z_stream zs{};
 			zs.zalloc = Z_NULL;
@@ -101,14 +103,7 @@ namespace model::fbx {
 			// ÉmÅ[Éhñº
 			char nodeName[64]{};
 			_bf.read((char*)&nodeName, sizeof(char) * nodeNameTotalBytes);
-			// EndString::connectionsStr = std::string{ nodeName };
-			//std::cout << nodeName << std::endl;
 			std::string nodeNameStr{ nodeName };
-			if (nodeNameStr == "Takes") {
-				int a = 0;
-				// _bf.seek(dist);
-				// return nullptr;
-			}
 
 			std::cout
 				<< "ifsPosition = " << _bf.getPosition()
@@ -201,7 +196,6 @@ namespace model::fbx {
 					+ ", nodeName = " + std::string{ nodeName }
 				};
 				std::cout << before << std::endl;
-				// OutputDebugString(std::wstring{ a }.c_str());
 				auto child = readNode(_bf, _version);
 				std::string after{
 					"after = ifsPosition = " + std::to_string(_bf.getPosition())
@@ -227,7 +221,7 @@ namespace model::fbx {
 				if (child) {
 					result->addNode(child);
 
-					if (child->getNodeName() == "Takes") {
+					if (child->getNodeName() == exitReadNodeName) {
 						break;
 					}
 				}
