@@ -105,14 +105,14 @@ namespace model::fbx {
 			_bf.read((char*)&nodeName, sizeof(char) * nodeNameTotalBytes);
 			std::string nodeNameStr{ nodeName };
 
-			std::cout
-				<< "ifsPosition = " << _bf.getPosition()
-				<< ", calcPosition = " << _bf.getTellg()
-				<< ", dist = " << dist
-				<< ", attributeNum = " << attributeNum
-				<< ", attributeTotalBytes = " << attributeTotalBytes
-				<< ", nodeNameTotalBytes = " << (int)nodeNameTotalBytes 
-				<< ", nodeName = " << nodeName << std::endl;
+			//std::cout
+			//	<< "ifsPosition = " << _bf.getPosition()
+			//	<< ", calcPosition = " << _bf.getTellg()
+			//	<< ", dist = " << dist
+			//	<< ", attributeNum = " << attributeNum
+			//	<< ", attributeTotalBytes = " << attributeTotalBytes
+			//	<< ", nodeNameTotalBytes = " << (int)nodeNameTotalBytes 
+			//	<< ", nodeName = " << nodeName << std::endl;
 
 			std::shared_ptr<FBXNode> object{ new FBXNode{} };
 			object->setName(nodeName);
@@ -189,21 +189,21 @@ namespace model::fbx {
 
 			// 子ノードがあり、nullptrではなければ
 			while (_bf.getPosition() < dist) {
-				std::string before{ 
-					"before = ifsPosition = " + std::to_string(_bf.getPosition())
-					+ ", calcPosition = " + std::to_string(_bf.getTellg()) 
-					+ ", dist = " + std::to_string(dist) 
-					+ ", nodeName = " + std::string{ nodeName }
-				};
-				std::cout << before << std::endl;
+				//std::string before{ 
+				//	"before = ifsPosition = " + std::to_string(_bf.getPosition())
+				//	+ ", calcPosition = " + std::to_string(_bf.getTellg()) 
+				//	+ ", dist = " + std::to_string(dist) 
+				//	+ ", nodeName = " + std::string{ nodeName }
+				//};
+				//std::cout << before << std::endl;
 				auto child = readNode(_bf, _version);
-				std::string after{
-					"after = ifsPosition = " + std::to_string(_bf.getPosition())
-					+ ", calcPosition = " + std::to_string(_bf.getTellg())
-					+ ", dist = " + std::to_string(dist)
-					+ ", nodeName = " + std::string{ nodeName }
-				};
-				std::cout << after << std::endl;
+				//std::string after{
+				//	"after = ifsPosition = " + std::to_string(_bf.getPosition())
+				//	+ ", calcPosition = " + std::to_string(_bf.getTellg())
+				//	+ ", dist = " + std::to_string(dist)
+				//	+ ", nodeName = " + std::string{ nodeName }
+				//};
+				//std::cout << after << std::endl;
 				if (child) {
 					object->addNode(child);
 				}
@@ -219,11 +219,13 @@ namespace model::fbx {
 			while (_bf.getPosition() != _bf.getSize()) {
 				auto child = readNode(_bf, _version);
 				if (child) {
-					result->addNode(child);
-
 					if (child->getNodeName() == exitReadNodeName) {
-						break;
+						int a = 0;
 					}
+					result->addNode(child);
+				}
+				else {
+					break;
 				}
 			}
 			return result;
@@ -262,9 +264,9 @@ namespace model::fbx {
 		rootNode = parseBinaryFBX(bf, version);
 		if (!rootNode) return false;
 
-		//createFbxScene();
+		createFbxScene();
 
-		//createFBXGeometry();
+		createFBXGeometry();
 
 		//createFbxTexture();
 
