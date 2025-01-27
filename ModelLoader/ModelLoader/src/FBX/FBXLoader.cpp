@@ -12,8 +12,6 @@ namespace model::fbx {
 
 	namespace {
 
-		const std::string exitReadNodeName{ "Takes" };
-
 		unsigned char* inflateData(const char* _inData, unsigned long long _elem, unsigned long long _byte, unsigned long long _typeSize) {
 			z_stream zs{};
 			zs.zalloc = Z_NULL;
@@ -94,8 +92,7 @@ namespace model::fbx {
 			char nodeNameTotalBytes{ _bf.read8() };
 
 			// ノード終了
-			// <= 7.4 13bytes
-			// >= 7.5 25bytes
+			// <= 7.4 13bytes, >= 7.5 25bytes
 			if (dist == 0 && attributeNum == 0 && attributeTotalBytes == 0 && nodeNameTotalBytes == 0) {
 				return nullptr;
 			}
@@ -103,7 +100,7 @@ namespace model::fbx {
 			// ノード名
 			char nodeName[64]{};
 			_bf.read((char*)&nodeName, sizeof(char) * nodeNameTotalBytes);
-			std::string nodeNameStr{ nodeName };
+			// std::string nodeNameStr{ nodeName };
 
 			//std::cout
 			//	<< "ifsPosition = " << _bf.getPosition()
@@ -219,9 +216,6 @@ namespace model::fbx {
 			while (_bf.getPosition() != _bf.getSize()) {
 				auto child = readNode(_bf, _version);
 				if (child) {
-					if (child->getNodeName() == exitReadNodeName) {
-						int a = 0;
-					}
 					result->addNode(child);
 				}
 				else {
@@ -247,34 +241,33 @@ namespace model::fbx {
 	{
 		BinaryFile bf{};
 		bf.open(_modelDir);
-		std::cout << "file size = " << bf.getSize() << std::endl;
+		std::cout << "File Size : " << bf.getSize() << std::endl;
 		if (bf.isFail()) {
 			return false;
 		}
 
 		char magicNumber[32];
 		bf.read(magicNumber, sizeof(char) * 23);
-		std::cout << "マジックナンバー : " << magicNumber << std::endl;
-
 		version = bf.read32();
-		std::cout << "バージョン : " << version << std::endl;
-		std::cout << "file Position = " << bf.getPosition() << std::endl;
-		std::cout << "現在の読み取り位置 = " << bf.getTellg() << std::endl;
+
+		std::cout << "MagicNumber : " << magicNumber << std::endl;
+		std::cout << "Version : " << version << std::endl;
 
 		rootNode = parseBinaryFBX(bf, version);
 		if (!rootNode) return false;
+		// std::cout << "success" << std::endl;
 
 		createFbxScene();
 
 		createFBXGeometry();
 
-		//createFbxTexture();
+		createFbxTexture();
 
-		//createMaterial();
+		createMaterial();
 
-		//createModel();
+		createModel();
 
-		//createConnections();
+		createConnections();
 
 		return true;
 	}
@@ -550,8 +543,6 @@ namespace model::fbx {
 		{
 			size_t currentIndex{ 0 };
 			for (auto& mesh : meshes) {
-				
-
 				auto layerElementNormalProp = mesh->findNode("LayerElementNormal");
 
 				auto mappingInfomationTypeProp = layerElementNormalProp->findNode("MappingInformationType");
