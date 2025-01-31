@@ -111,6 +111,9 @@ namespace model::fbx {
 			//	<< ", nodeNameTotalBytes = " << (int)nodeNameTotalBytes 
 			//	<< ", nodeName = " << nodeName << std::endl;
 
+			if (std::string{ nodeName } == "Content") {
+				int a = 0;
+			}
 			std::shared_ptr<FBXNode> object{ new FBXNode{} };
 			object->setName(nodeName);
 
@@ -120,7 +123,9 @@ namespace model::fbx {
 				if (attribute == 'S' || attribute == 'R') {
 					long long _nodeNameTotalBytes{ _bf.read32() };
 					char _nodeName[256]{};
+					std::cout << "R " << _nodeNameTotalBytes << std::endl;
 					_bf.read((char*)&_nodeName, sizeof(char) * _nodeNameTotalBytes);
+					// std::cout << "R " << _nodeNameTotalBytes << " " << _nodeName << std::endl;
 					FBXPropertyPtr property = std::make_shared<FBXStringProperty>(_nodeName);
 					object->addPropertys(property);
 				}
@@ -255,7 +260,7 @@ namespace model::fbx {
 
 		rootNode = parseBinaryFBX(bf, version);
 		if (!rootNode) return false;
-		// std::cout << "success" << std::endl;
+		std::cout << "success" << std::endl;
 
 		createFbxScene();
 

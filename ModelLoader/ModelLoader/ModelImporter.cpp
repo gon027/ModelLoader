@@ -212,7 +212,7 @@ void ModelImporter::loadFBX(const std::string& _name, const ModelDesc& _modelDes
 	const auto parentDir = dir.parent_path();
 
 	model::fbx::FBXLoader fbxLoader{};
-	if (!fbxLoader.load(_modelDesc.modelFileName)) {
+	if (!fbxLoader.load(_modelDesc.modelDirectoy + _modelDesc.modelFileName)) {
 		return;
 	}
 	ModelDataPtr modelData{ new model::ModelData{} };
