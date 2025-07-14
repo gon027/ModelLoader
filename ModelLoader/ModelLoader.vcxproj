@@ -149,7 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Test\test_load_fbx_01.cpp" />
+    <ClCompile Include="ModelLoader\src\OBJ\ObjLoader.cpp" />
     <ClCompile Include="ModelLoader\src\BinaryFile\BinaryFile.cpp" />
     <ClCompile Include="ModelLoader\Debug\Debug.cpp" />
     <ClCompile Include="ModelLoader\src\FBX\FBXDataStruct.cpp" />
@@ -165,6 +165,7 @@
     <ClInclude Include="ModelLoader\include\FBX\FBXProperty.hpp" />
     <ClInclude Include="ModelLoader\include\ModelData.hpp" />
     <ClInclude Include="ModelLoader\include\FBX\FBXDataStruct.hpp" />
+    <ClInclude Include="ModelLoader\include\OBJ\OBJData.hpp" />
     <ClInclude Include="ModelLoader\ModelHeader.hpp" />
     <ClInclude Include="ModelLoader\ModelImporter.hpp" />
     <ClInclude Include="ModelLoader\include\ModelLoader.hpp" />
