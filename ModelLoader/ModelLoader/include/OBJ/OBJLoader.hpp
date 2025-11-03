@@ -40,7 +40,6 @@ namespace model::obj {
 		std::vector<Vertex2> texcoords;
 		std::vector<Vertex3> normals;
 
-
 		// 最終的に出力する頂点
 		std::vector<ObjVertex> objVertices;
 
