@@ -136,44 +136,49 @@ namespace model::obj {
 				std::string oneLine{};
 				std::getline(ifs, oneLine);
 
+				const auto parseInteger = [](const std::string& num) -> int {
+					try {
+						return std::stoi(num) - 1;
+					}
+					catch (const std::exception& e) {
+						return -1;
+					}
+				};
+
 				std::vector<std::string> sLine = split(oneLine, CHAR_BLANK);
-				// std::cout << sLine.size() << std::endl;
-
 				for (const auto& unit : sLine) {
-					std::vector<std::string> aaaa = split(unit, CHAR_SLASH);
-
 					int vIndex{ -1 };
 					int vtIndex{ -1 };
 					int vnIndex{ -1 };
 
+					std::vector<std::string> aaaa = split(unit, CHAR_SLASH);
+
 					// 要素が1なら[頂点]
 					if (aaaa.size() == 1) {
 						// 頂点
-						vIndex = std::stoi(aaaa[0]) - 1;
+						vIndex = parseInteger(aaaa[0]);
 					}
 
 					// 要素が2なら[頂点, UV]
 					if (aaaa.size() == 2) {
 						// 頂点
-						vIndex = std::stoi(aaaa[0]) - 1;
+						vIndex = parseInteger(aaaa[0]);
 
 						// 法線
-						vtIndex = std::stoi(aaaa[1]) - 1;
+						vtIndex = parseInteger(aaaa[1]);
 					}
 					
 					// 要素が3なら[頂点, UV, 法線]
 					// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
 					if (aaaa.size() == 3) {
 						// 頂点
-						vIndex = std::stoi(aaaa[0]) - 1;
+						vIndex = parseInteger(aaaa[0]);
 
 						// テクスチャ座標は、値が入っていたら変換する
-						if (aaaa[1].empty()) {
-							vtIndex = std::stoi(aaaa[1]) - 1;
-						}
+						if (aaaa[1].empty()) vtIndex = parseInteger(aaaa[1]);
 
 						// 法線
-						vnIndex = std::stoi(aaaa[2]) - 1;
+						vnIndex = parseInteger(aaaa[2]);
 					}
 
 					std::cout << "{ "
