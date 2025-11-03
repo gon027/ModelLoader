@@ -13,12 +13,12 @@ namespace model::obj {
 
 	struct ObjVertex {
 		model::Vertex3 position;
-		model::Vertex3 normal;
 		model::Vertex2 texcoord;
+		model::Vertex3 normal;
 
 	public:
 		ObjVertex()
-			: position{}, normal{}, texcoord{}
+			: position{}, texcoord{}, normal{}
 		{}
 	};
 

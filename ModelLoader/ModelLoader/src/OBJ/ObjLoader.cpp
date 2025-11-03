@@ -126,7 +126,13 @@ namespace model::obj {
 				* f v1//vn1 v2//vn1 v3//vn1 ...
 				*/
 
-				std::vector<ObjVertex> tmpObjVertex{};
+				// 
+				const int VEC_MAX_SIZE{ 4 };
+				// std::vector<int> posa(VEC_MAX_SIZE, -1), a(VEC_MAX_SIZE, -1), hoge(VEC_MAX_SIZE, -1);
+
+				const int VERTEX_SIZE{ static_cast<int>(vertices.size()) };
+				const int TEXCOORD_SIZE{ static_cast<int>(texcoords.size()) };
+				const int NORMAL_SIZE{ static_cast<int>(normals.size()) };
 
 				// 文字列の1文字目が空白の場合省きたい
 				// fを読み取ったあと空白と前提にしている
@@ -136,15 +142,21 @@ namespace model::obj {
 				std::string oneLine{};
 				std::getline(ifs, oneLine);
 
-				const auto parseInteger = [](const std::string& num) -> int {
+				const auto parseInteger = [](const std::string& _num, int _size) -> int {
 					try {
-						return std::stoi(num) - 1;
+						int parse = std::stoi(_num);
+						int tmpIdx = parse;
+						if (tmpIdx < 0) tmpIdx = static_cast<int>(_size) + tmpIdx;
+						else tmpIdx = tmpIdx - 1;
+						return tmpIdx;
 					}
-					catch (const std::exception& e) {
+					catch (const std::exception& _e) {
+						std::cout << "エラーログ" << std::endl;
 						return -1;
 					}
 				};
 
+				int count{ 0 };
 				std::vector<std::string> sLine = split(oneLine, CHAR_BLANK);
 				for (const auto& unit : sLine) {
 					int vIndex{ -1 };
@@ -156,36 +168,32 @@ namespace model::obj {
 					// 要素が1なら[頂点]
 					if (aaaa.size() == 1) {
 						// 頂点
-						vIndex = parseInteger(aaaa[0]);
+						vIndex = parseInteger(aaaa[0], VERTEX_SIZE);
 					}
 
 					// 要素が2なら[頂点, UV]
 					if (aaaa.size() == 2) {
 						// 頂点
-						vIndex = parseInteger(aaaa[0]);
+						vIndex = parseInteger(aaaa[0], VERTEX_SIZE);
 
-						// 法線
-						vtIndex = parseInteger(aaaa[1]);
+						// テクスチャ座標
+						vtIndex = parseInteger(aaaa[1], TEXCOORD_SIZE);
 					}
 					
 					// 要素が3なら[頂点, UV, 法線]
 					// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
 					if (aaaa.size() == 3) {
 						// 頂点
-						vIndex = parseInteger(aaaa[0]);
+						vIndex = parseInteger(aaaa[0], VERTEX_SIZE);
 
 						// テクスチャ座標は、値が入っていたら変換する
-						if (aaaa[1].empty()) vtIndex = parseInteger(aaaa[1]);
+						if (!aaaa[1].empty()) vtIndex = parseInteger(aaaa[1], TEXCOORD_SIZE);
 
 						// 法線
-						vnIndex = parseInteger(aaaa[2]);
+						vnIndex = parseInteger(aaaa[2], NORMAL_SIZE);
 					}
 
-					std::cout << "{ "
-						<< vIndex << ", "
-						<< vtIndex << ", "
-						<< vnIndex << " }"
-						<< std::endl;
+					std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
 
 					// 取得したインデックスからObjVertexを作成する
 					ObjVertex oVertex{};
@@ -211,13 +219,6 @@ namespace model::obj {
 				// countの数によって処理を分ける
 				// count = 4の場合、4角形
 				if (sLine.size() == 4) {
-					// std::cout << "4角形" << std::endl;
-
-
-
-
-
-
 
 				}
 			}

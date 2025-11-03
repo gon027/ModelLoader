@@ -34,8 +34,6 @@ namespace model::obj {
 		bool loadMtlFile();
 
 	private:
-		// std::vector<ObjVertex> objVec;
-
 		std::vector<Vertex3> vertices;
 		std::vector<Vertex2> texcoords;
 		std::vector<Vertex3> normals;
