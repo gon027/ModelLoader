@@ -111,6 +111,7 @@ namespace model::obj {
 			}
 			else if (line == "f") {
 				/*
+				* 参考資料
 				* https://ja.wikipedia.org/wiki/Wavefront_.obj%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB
 				* 
 				* 頂点インデックス
