@@ -126,9 +126,12 @@ namespace model::obj {
 				* f v1//vn1 v2//vn1 v3//vn1 ...
 				*/
 
-				// 
+				// インデックスを保存するVector
 				const int VEC_MAX_SIZE{ 4 };
-				// std::vector<int> posa(VEC_MAX_SIZE, -1), a(VEC_MAX_SIZE, -1), hoge(VEC_MAX_SIZE, -1);
+				std::vector<int> 
+					vertIdxVec(VEC_MAX_SIZE, -1), 
+					tecIdxVec(VEC_MAX_SIZE, -1), 
+					norIdxVec(VEC_MAX_SIZE, -1);
 
 				const int VERTEX_SIZE{ static_cast<int>(vertices.size()) };
 				const int TEXCOORD_SIZE{ static_cast<int>(texcoords.size()) };
@@ -163,34 +166,34 @@ namespace model::obj {
 					int vtIndex{ -1 };
 					int vnIndex{ -1 };
 
-					std::vector<std::string> aaaa = split(unit, CHAR_SLASH);
+					std::vector<std::string> splitUnit = split(unit, CHAR_SLASH);
 
 					// 要素が1なら[頂点]
-					if (aaaa.size() == 1) {
+					if (splitUnit.size() == 1) {
 						// 頂点
-						vIndex = parseInteger(aaaa[0], VERTEX_SIZE);
+						vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 					}
 
 					// 要素が2なら[頂点, UV]
-					if (aaaa.size() == 2) {
+					if (splitUnit.size() == 2) {
 						// 頂点
-						vIndex = parseInteger(aaaa[0], VERTEX_SIZE);
+						vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 
 						// テクスチャ座標
-						vtIndex = parseInteger(aaaa[1], TEXCOORD_SIZE);
+						vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
 					}
 					
 					// 要素が3なら[頂点, UV, 法線]
 					// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
-					if (aaaa.size() == 3) {
+					if (splitUnit.size() == 3) {
 						// 頂点
-						vIndex = parseInteger(aaaa[0], VERTEX_SIZE);
+						vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 
 						// テクスチャ座標は、値が入っていたら変換する
-						if (!aaaa[1].empty()) vtIndex = parseInteger(aaaa[1], TEXCOORD_SIZE);
+						if (!splitUnit[1].empty()) vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
 
 						// 法線
-						vnIndex = parseInteger(aaaa[2], NORMAL_SIZE);
+						vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
 					}
 
 					std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
@@ -214,12 +217,74 @@ namespace model::obj {
 					}
 
 					objVertices.emplace_back(oVertex);
+					++count;
+					if (count >= 3) {
+						break;
+					}
 				}
 				
 				// countの数によって処理を分ける
 				// count = 4の場合、4角形
-				if (sLine.size() == 4) {
+				if (sLine.size() >= 4) {
+					for (int i{ 1 }; i < sLine.size(); ++i) {
+						int vIndex{ -1 };
+						int vtIndex{ -1 };
+						int vnIndex{ -1 };
 
+						int hoge = (i + 1) % 4;
+						auto& unit = sLine[hoge];
+						std::vector<std::string> splitUnit = split(unit, CHAR_SLASH);
+
+						// 要素が1なら[頂点]
+						if (splitUnit.size() == 1) {
+							// 頂点
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
+						}
+
+						// 要素が2なら[頂点, UV]
+						if (splitUnit.size() == 2) {
+							// 頂点
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
+
+							// テクスチャ座標
+							vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
+						}
+
+						// 要素が3なら[頂点, UV, 法線]
+						// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
+						if (splitUnit.size() == 3) {
+							// 頂点
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
+
+							// テクスチャ座標は、値が入っていたら変換する
+							if (!splitUnit[1].empty()) vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
+
+							// 法線
+							vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
+						}
+
+						std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
+
+						// 取得したインデックスからObjVertexを作成する
+						ObjVertex oVertex{};
+
+						// 頂点
+						if (vIndex >= 0) {
+							oVertex.position = vertices[vIndex];
+						}
+
+						//  テクスチャ座標
+						if (vtIndex >= 0) {
+							oVertex.texcoord = texcoords[vtIndex];
+						}
+
+						// 法線
+						if (vnIndex >= 0) {
+							oVertex.normal = normals[vnIndex];
+						}
+
+						objVertices.emplace_back(oVertex);
+					}
 				}
 			}
 		}
