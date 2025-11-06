@@ -10,7 +10,6 @@
 namespace model::obj {
 
 	// https://asura.iaigiri.com/OpenGL/gl15_2.html
-	// https://ja.wikipedia.org/wiki/Wavefront_.obj%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB
 
 	namespace {
 
@@ -18,25 +17,6 @@ namespace model::obj {
 		constexpr char CHAR_SLASH{ '/' };
 
 		const std::string STR_BLANK = " ";
-
-		/// <summary>
-		/// 空白の侵入を許さない
-		/// </summary>
-		/// <param name="s"></param>
-		/// <param name="delim"></param>
-		/// <returns></returns>
-		std::vector<std::string> split1(const std::string& s, char delim) {
-			std::vector<std::string> result{};
-
-			std::stringstream ss{ s };
-			std::string item{};
-			while (std::getline(ss, item, delim)) {
-				if (!item.empty()) {
-					result.push_back(item);
-				}
-			}
-			return result;
-		}
 
 		/// <summary>
 		/// 
@@ -61,9 +41,31 @@ namespace model::obj {
 		}
 	}
 
-	bool ObjLoader::load(const std::string& _fileName) {
+	ObjLoader::ObjLoader()
+		: folderPath{}
+	{
+	}
+
+	bool ObjLoader::load(const std::string& _folderPath, const std::string& _fileName) {
 		
-		std::ifstream ifs{ _fileName };
+		folderPath = _folderPath;
+
+		//  objファイルを読み込み
+		if (!loadObjFile(_fileName)) {
+			return false;
+		}
+		
+		// mltファイルを読み込む
+		if (!loadMtlFile()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool ObjLoader::loadObjFile(const std::string& _objFileName)
+	{
+		std::ifstream ifs{ folderPath + _objFileName };
 		if (!ifs) {
 			return false;
 		}
@@ -72,10 +74,7 @@ namespace model::obj {
 			return false;
 		}
 
-		std::vector<ObjVertex> t_vertex{};
-		std::vector<unsigned int> t_indices{};
-
-		std::string line;
+		std::string line{};
 		while (true) {
 
 			ifs >> line;
@@ -86,52 +85,57 @@ namespace model::obj {
 			}
 
 			if (line == "#") {
-				;
+				; // コメント行のため処理を行わない
 			}
-			else if (line == "mtllib") {
+			
+			if (line == "mtllib") {
 				ifs >> mtlFileName;
 			}
-			else if (line == "v") {
+			
+			if (line == "v") {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				Vertex3 vert{ x, y, z };
 				vertices.push_back(vert);
 			}
-			else if (line == "vt") {
+			
+			if (line == "vt") {
 				float u{}, v{};
 				ifs >> u >> v;
 				Vertex2 texcoord{ u, v };
 				texcoords.push_back(texcoord);
 			}
-			else if (line == "vn") {
+			
+			if (line == "vn") {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				Vertex3 normal{ x, y, z };
 				normals.push_back(normal);
 			}
-			else if (line == "f") {
+			
+			if (line == "f") {
 				/*
 				* 参考資料
 				* https://ja.wikipedia.org/wiki/Wavefront_.obj%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB
-				* 
+				*
 				* 頂点インデックス
 				* f v1 v2 v3
-				* 
+				*
 				* 頂点テクスチャ座標インデックス
 				* f v1/vt1 v2/vt2 v3/vt3 ...
-				* 
+				*
 				* 頂点法線インデックス
 				* f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3 ...
-				* 
+				*
 				* テクスチャ座標インデックスなし頂点法線インデックス
 				* f v1//vn1 v2//vn1 v3//vn1 ...
 				*/
 
 				// インデックスを保存するVector
 				const int VEC_MAX_SIZE{ 4 };
-				std::vector<int> 
-					vertIdxVec(VEC_MAX_SIZE, -1), 
-					tecIdxVec(VEC_MAX_SIZE, -1), 
+				std::vector<int>
+					vertIdxVec(VEC_MAX_SIZE, -1),
+					tecIdxVec(VEC_MAX_SIZE, -1),
 					norIdxVec(VEC_MAX_SIZE, -1);
 
 				const int VERTEX_SIZE{ static_cast<int>(vertices.size()) };
@@ -146,17 +150,19 @@ namespace model::obj {
 				std::string oneLine{};
 				std::getline(ifs, oneLine);
 
-				const auto parseInteger = [](const std::string& _num, int _size) -> int {
-					try {
-						int parse = std::stoi(_num);
-						int tmpIdx = parse;
-						if (tmpIdx < 0) tmpIdx = static_cast<int>(_size) + tmpIdx;
-						else tmpIdx = tmpIdx - 1;
-						return tmpIdx;
-					}
-					catch (const std::exception& _e) {
-						std::cout << "エラーログ" << std::endl;
-						return -1;
+				const auto parseInteger{
+					[](const std::string& _num, int _size) -> int {
+						try {
+							int parse = std::stoi(_num);
+							int tmpIdx = parse;
+							if (tmpIdx < 0) tmpIdx = static_cast<int>(_size) + tmpIdx;
+							else tmpIdx = tmpIdx - 1;
+							return tmpIdx;
+						}
+						catch (const std::exception& _e) {
+							std::cout << "エラーログ" << std::endl;
+							return -1;
+						}
 					}
 				};
 
@@ -183,7 +189,7 @@ namespace model::obj {
 						// テクスチャ座標
 						vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
 					}
-					
+
 					// 要素が3なら[頂点, UV, 法線]
 					// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
 					if (splitUnit.size() == 3) {
@@ -197,7 +203,7 @@ namespace model::obj {
 						vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
 					}
 
-					std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
+					//std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
 
 					// 取得したインデックスからObjVertexを作成する
 					ObjVertex oVertex{};
@@ -223,7 +229,7 @@ namespace model::obj {
 						break;
 					}
 				}
-				
+
 				// countの数によって処理を分ける
 				// count = 4の場合、4角形
 				if (sLine.size() >= 4) {
@@ -287,6 +293,87 @@ namespace model::obj {
 						objVertices.emplace_back(oVertex);
 					}
 				}
+			}
+		}
+
+		return true;
+	}
+
+	bool ObjLoader::loadMtlFile()
+	{
+		if (mtlFileName == "") {
+			return true;
+		}
+
+		std::ifstream ifs{ folderPath + mtlFileName };
+		if (!ifs) {
+			return false;
+		}
+
+		if (!ifs.is_open()) {
+			return false;
+		}
+
+		std::string line{};
+		while (true) {
+			ifs >> line;
+			// std::cout << line << std::endl;
+
+			if (ifs.eof()) {
+				break;
+			}
+
+			if (line == "#") {
+				; // コメント行のため処理を行わない
+			}
+
+			// アンビエント
+			if (line == "Ka") {
+				float x{}, y{}, z{};
+				ifs >> x >> y >> z;
+				material.ambient = { x, y, z };
+			}
+
+			// ディフューズ 
+			if (line == "Kd") {
+				float x{}, y{}, z{};
+				ifs >> x >> y >> z;
+				material.diffuse = { x, y, z };
+			}
+
+			// スペキュラ
+			if (line == "Ks") {
+				float x{}, y{}, z{};
+				ifs >> x >> y >> z;
+				material.specula = { x, y, z };
+			}
+
+			// スペキュラ指数
+			if (line == "Ns") {
+				float value{ 0.0f };
+				ifs >> value;
+				material.speculaWeight = value;
+			}
+
+			//  ディゾルブ
+			if (line == "d") {
+				float value{ 0.0f };
+				ifs >> value;
+				material.dissolve = value;
+			}
+
+			// 屈折率
+			if (line == "Ni") {
+				float value{ 0.0f };
+				ifs >> value;
+				material.refractive = value;
+			}
+
+			// ディフューズテクスチャマップ
+			if (line == "map_Kd") {
+				std::string name;
+				ifs >> name;
+				material.kdTextureName = name;
 			}
 		}
 

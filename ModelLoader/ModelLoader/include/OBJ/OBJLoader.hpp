@@ -8,10 +8,10 @@ namespace model::obj {
 
 	class ObjLoader {
 	public:
-		ObjLoader() = default;
+		ObjLoader();
 		~ObjLoader() = default;
 
-		bool load(const std::string& _fileName);
+		bool load(const std::string& _folderPath, const std::string& _fileName);
 
 		inline std::vector<Vertex3>& getVertex() {
 			return vertices;
@@ -30,16 +30,21 @@ namespace model::obj {
 		}
 
 	private:
-		bool loadObjFile();
+		bool loadObjFile(const std::string& _objFileName);
 		bool loadMtlFile();
 
 	private:
+		std::string folderPath;
+
 		std::vector<Vertex3> vertices;
 		std::vector<Vertex2> texcoords;
 		std::vector<Vertex3> normals;
 
 		// 最終的に出力する頂点
 		std::vector<ObjVertex> objVertices;
+
+		// マテリアル
+		ObjMaterial material;
 
 		std::string mtlFileName;
 	};
