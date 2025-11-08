@@ -266,13 +266,37 @@ namespace model::obj {
 				//for (const auto& unit : sLine) {
 				//	faceVec.push_back(hoge(unit));
 				//}
+				//
+				//int faceNum{ static_cast<int>(ceil(static_cast<double>(faceVec.size()) / 3.0)) };
+				//for (int i{ 0 }; i < faceNum; ++i) {
 
-				//for (size_t idx{ 0 }; idx < faceVec.size(); ++idx) {
-				//	int hogei = (idx + 1) % 4;
-				//	const auto& [vIndex, vtIndex, vnIndex] = faceVec[hogei];
+				//	for (int idx{ i }; idx < 3 + i /*faceVec.size()*/; ++idx) {
+				//		// int hogei = (idx + 1) % faceVec.size();
+				//		const auto& [vIndex, vtIndex, vnIndex] = faceVec[idx];
+
+				//		// 取得したインデックスからObjVertexを作成する
+				//		ObjVertex oVertex{};
+
+				//		// 頂点
+				//		if (vIndex >= 0) {
+				//			oVertex.position = vertices[vIndex];
+				//		}
+
+				//		//  テクスチャ座標
+				//		if (vtIndex >= 0) {
+				//			oVertex.texcoord = texcoords[vtIndex];
+				//		}
+
+				//		// 法線
+				//		if (vnIndex >= 0) {
+				//			oVertex.normal = normals[vnIndex];
+				//		}
+
+				//		objVertices.emplace_back(oVertex);
+				//	}
 				//}
 
-				
+
 				int count{ 0 };
 				std::vector<std::string> sLine = split(oneLine, CHAR_BLANK);
 				for (const auto& unit : sLine) {
@@ -335,9 +359,6 @@ namespace model::obj {
 						objVertices.emplace_back(oVertex);
 					}
 				}
-				
-
-
 
 			}
 		}
