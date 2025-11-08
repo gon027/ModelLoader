@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <tuple>
 
 namespace model::obj {
 
@@ -47,14 +48,14 @@ namespace model::obj {
 	}
 
 	bool ObjLoader::load(const std::string& _folderPath, const std::string& _fileName) {
-		
+
 		folderPath = _folderPath;
 
 		//  objファイルを読み込み
 		if (!loadObjFile(_fileName)) {
 			return false;
 		}
-		
+
 		// mltファイルを読み込む
 		if (!loadMtlFile()) {
 			return false;
@@ -87,32 +88,32 @@ namespace model::obj {
 			if (line == "#") {
 				; // コメント行のため処理を行わない
 			}
-			
+
 			if (line == "mtllib") {
 				ifs >> mtlFileName;
 			}
-			
+
 			if (line == "v") {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				Vertex3 vert{ x, y, z };
 				vertices.push_back(vert);
 			}
-			
+
 			if (line == "vt") {
 				float u{}, v{};
 				ifs >> u >> v;
 				Vertex2 texcoord{ u, v };
 				texcoords.push_back(texcoord);
 			}
-			
+
 			if (line == "vn") {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				Vertex3 normal{ x, y, z };
 				normals.push_back(normal);
 			}
-			
+
 			if (line == "f") {
 				/*
 				* 参考資料
@@ -166,9 +167,52 @@ namespace model::obj {
 					}
 				};
 
+				auto hoge{
+					[&](const std::string& unit) -> std::tuple<int, int, int> {
+						int vIndex{ -1 };
+						int vtIndex{ -1 };
+						int vnIndex{ -1 };
+
+						std::vector<std::string> splitUnit = split(unit, CHAR_SLASH);
+
+						// 要素が1なら[頂点]
+						if (splitUnit.size() == 1) {
+							// 頂点
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
+						}
+
+						// 要素が2なら[頂点, UV]
+						if (splitUnit.size() == 2) {
+							// 頂点
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
+
+							// テクスチャ座標
+							vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
+						}
+
+						// 要素が3なら[頂点, UV, 法線]
+						// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
+						if (splitUnit.size() == 3) {
+							// 頂点
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
+
+							// テクスチャ座標は、値が入っていたら変換する
+							if (!splitUnit[1].empty() && splitUnit[1] != " ") {
+								vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
+							}
+
+							// 法線
+							vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
+						}
+
+						return { vIndex, vtIndex, vnIndex };
+					}
+				};
+
 				int count{ 0 };
 				std::vector<std::string> sLine = split(oneLine, CHAR_BLANK);
 				for (const auto& unit : sLine) {
+					/*
 					int vIndex{ -1 };
 					int vtIndex{ -1 };
 					int vnIndex{ -1 };
@@ -197,13 +241,18 @@ namespace model::obj {
 						vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 
 						// テクスチャ座標は、値が入っていたら変換する
-						if (!splitUnit[1].empty()) vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
+						if (!splitUnit[1].empty() && splitUnit[1] != " ") {
+							vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
+						}
 
 						// 法線
 						vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
 					}
+					*/
 
 					//std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
+
+					const auto [vIndex, vtIndex, vnIndex] = hoge(unit);
 
 					// 取得したインデックスからObjVertexを作成する
 					ObjVertex oVertex{};
@@ -234,6 +283,7 @@ namespace model::obj {
 				// count = 4の場合、4角形
 				if (sLine.size() >= 4) {
 					for (int i{ 1 }; i < sLine.size(); ++i) {
+						/*
 						int vIndex{ -1 };
 						int vtIndex{ -1 };
 						int vnIndex{ -1 };
@@ -269,8 +319,12 @@ namespace model::obj {
 							// 法線
 							vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
 						}
+						*/
 
-						std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
+						int hogei = (i + 1) % 4;
+						auto& unit = sLine[hogei];
+						const auto [vIndex, vtIndex, vnIndex] = hoge(unit);
+						// std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
 
 						// 取得したインデックスからObjVertexを作成する
 						ObjVertex oVertex{};
