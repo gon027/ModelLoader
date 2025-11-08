@@ -29,6 +29,10 @@ namespace model::obj {
 			return objVertices;
 		}
 
+		inline ObjMaterial& getMaterial() {
+			return material;
+		}
+
 	private:
 		bool loadObjFile(const std::string& _objFileName);
 		bool loadMtlFile();
