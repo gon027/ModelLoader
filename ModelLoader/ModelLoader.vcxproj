@@ -163,6 +163,7 @@
     <ClInclude Include="ModelLoader\Debug\Debug.hpp" />
     <ClInclude Include="ModelLoader\include\FBX\FBXLoader.hpp" />
     <ClInclude Include="ModelLoader\include\FBX\FBXProperty.hpp" />
+    <ClInclude Include="ModelLoader\include\gtlf\GltfLoader.hpp" />
     <ClInclude Include="ModelLoader\include\ModelData.hpp" />
     <ClInclude Include="ModelLoader\include\FBX\FBXDataStruct.hpp" />
     <ClInclude Include="ModelLoader\include\OBJ\OBJData.hpp" />

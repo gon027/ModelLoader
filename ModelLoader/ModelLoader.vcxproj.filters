@@ -110,5 +110,8 @@
     <ClInclude Include="ModelLoader\include\OBJ\OBJLoader.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="ModelLoader\include\gtlf\GltfLoader.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
