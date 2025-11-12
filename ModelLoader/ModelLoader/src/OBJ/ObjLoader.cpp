@@ -76,6 +76,10 @@ namespace model::obj {
 			return false;
 		}
 
+		std::vector<Vertex3> vertices;
+		std::vector<Vertex2> texcoords;
+		std::vector<Vertex3> normals;
+
 		std::unordered_map<std::string, int> vecVertIdxMap{};
 		std::unordered_map<std::string, int> vecIndxIdxMap{};
 		std::unordered_map<std::string, int> vecNormIdxMap{};
