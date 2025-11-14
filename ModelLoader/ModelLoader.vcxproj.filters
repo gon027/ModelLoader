@@ -45,7 +45,7 @@
     <ClCompile Include="ModelLoader\src\FBX\FBXDataStruct.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader\Debug\Debug.cpp">
+    <ClCompile Include="ModelLoader\DebugLog\DebugLog.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoader\src\OBJ\ObjLoader.cpp">
@@ -101,7 +101,7 @@
     <ClInclude Include="ModelLoader\include\Vertex\Vertex.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader\Debug\Debug.hpp">
+    <ClInclude Include="ModelLoader\DebugLog\DebugLog.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader\include\OBJ\OBJData.hpp">

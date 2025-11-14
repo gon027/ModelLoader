@@ -1,4 +1,4 @@
-#include "Debug.hpp"
+#include "DebugLog.hpp"
 #include <fstream>
 
 namespace utils {

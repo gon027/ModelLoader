@@ -151,7 +151,7 @@
   <ItemGroup>
     <ClCompile Include="ModelLoader\src\OBJ\ObjLoader.cpp" />
     <ClCompile Include="ModelLoader\src\BinaryFile\BinaryFile.cpp" />
-    <ClCompile Include="ModelLoader\Debug\Debug.cpp" />
+    <ClCompile Include="ModelLoader\DebugLog\DebugLog.cpp" />
     <ClCompile Include="ModelLoader\src\FBX\FBXDataStruct.cpp" />
     <ClCompile Include="ModelLoader\src\FBX\FBXLoader.cpp" />
     <ClCompile Include="ModelLoader\ModelImporter.cpp" />
@@ -160,7 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelLoader\include\BinaryFile\BinaryFile.hpp" />
-    <ClInclude Include="ModelLoader\Debug\Debug.hpp" />
+    <ClInclude Include="ModelLoader\DebugLog\DebugLog.hpp" />
     <ClInclude Include="ModelLoader\include\FBX\FBXLoader.hpp" />
     <ClInclude Include="ModelLoader\include\FBX\FBXProperty.hpp" />
     <ClInclude Include="ModelLoader\include\gtlf\GltfLoader.hpp" />
