@@ -34,6 +34,15 @@ namespace model::obj {
 		std::string kdTextureName;  // map_Kd: ディフューズテクスチャマップ
 
 	public:
-		ObjMaterial() = default;
+		ObjMaterial()
+			: materialName{}
+			, ambient{}
+			, diffuse{}
+			, specula{}
+			, speculaWeight{0.0f}
+			, dissolve{1.0f}
+			, refractive{1.0f}
+			, kdTextureName{}
+		{}
 	};
 }

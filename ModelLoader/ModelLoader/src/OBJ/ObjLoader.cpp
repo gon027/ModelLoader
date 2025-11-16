@@ -45,6 +45,7 @@ namespace model::obj {
 
 	ObjLoader::ObjLoader()
 		: folderPath{}
+		, isLoadFlag{ false }
 	{
 	}
 
@@ -62,7 +63,13 @@ namespace model::obj {
 			return false;
 		}
 
+		isLoadFlag = true;
 		return true;
+	}
+
+	bool ObjLoader::isLoad()
+	{
+		return isLoadFlag;
 	}
 
 	bool ObjLoader::loadObjFile(const std::string& _objFileName)
@@ -385,6 +392,10 @@ namespace model::obj {
 			return false;
 		}
 
+		std::string mtlName{ "" };
+		ObjMaterial objMat{};
+		bool flag = false;
+
 		std::string line{};
 		while (true) {
 			ifs >> line;
@@ -398,11 +409,30 @@ namespace model::obj {
 				; // コメント行のため処理を行わない
 			}
 
+			if (line == "newmtl") {
+				std::cout << "newmtl" << std::endl;
+				if (mtlName == "") {
+					ifs >> mtlName;
+					objMat = {};
+					flag = true;
+				}
+				else {
+					ifs >> mtlName;
+					// 格納する
+					objMaterials.emplace_back(objMat);
+
+					// 初期化
+					objMat = {};
+				}
+			}
+
 			// アンビエント
 			if (line == "Ka") {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				material.ambient = { x, y, z };
+
+				objMat.ambient = { x, y, z };
 			}
 
 			// ディフューズ 
@@ -410,6 +440,8 @@ namespace model::obj {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				material.diffuse = { x, y, z };
+
+				objMat.diffuse = { x, y, z };
 			}
 
 			// スペキュラ
@@ -417,6 +449,8 @@ namespace model::obj {
 				float x{}, y{}, z{};
 				ifs >> x >> y >> z;
 				material.specula = { x, y, z };
+
+				objMat.specula = { x, y, z };
 			}
 
 			// スペキュラ指数
@@ -424,6 +458,8 @@ namespace model::obj {
 				float value{ 0.0f };
 				ifs >> value;
 				material.speculaWeight = value;
+
+				objMat.speculaWeight = value;
 			}
 
 			//  ディゾルブ
@@ -431,6 +467,8 @@ namespace model::obj {
 				float value{ 0.0f };
 				ifs >> value;
 				material.dissolve = value;
+
+				objMat.dissolve = value;
 			}
 
 			// 屈折率
@@ -438,6 +476,8 @@ namespace model::obj {
 				float value{ 0.0f };
 				ifs >> value;
 				material.refractive = value;
+
+				objMat.refractive = value;
 			}
 
 			// ディフューズテクスチャマップ
@@ -445,7 +485,14 @@ namespace model::obj {
 				std::string name;
 				ifs >> name;
 				material.kdTextureName = name;
+
+				objMat.kdTextureName = name;
 			}
+		}
+
+		if (flag) {
+			// 格納する
+			objMaterials.emplace_back(objMat);
 		}
 
 		return true;

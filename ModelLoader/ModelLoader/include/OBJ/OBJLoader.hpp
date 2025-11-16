@@ -13,6 +13,8 @@ namespace model::obj {
 
 		bool load(const std::string& _folderPath, const std::string& _fileName);
 
+		bool isLoad();
+
 		inline std::vector<ObjVertex>& getObjVertex() {
 			return objVertices;
 		}
@@ -26,6 +28,8 @@ namespace model::obj {
 		bool loadMtlFile();
 
 	private:
+		bool isLoadFlag;
+
 		std::string folderPath;
 
 		// 最終的に出力する頂点
