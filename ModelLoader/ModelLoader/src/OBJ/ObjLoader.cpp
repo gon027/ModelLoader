@@ -87,10 +87,6 @@ namespace model::obj {
 		std::vector<Vertex2> texcoords;
 		std::vector<Vertex3> normals;
 
-		std::unordered_map<std::string, int> vecVertIdxMap{};
-		std::unordered_map<std::string, int> vecIndxIdxMap{};
-		std::unordered_map<std::string, int> vecNormIdxMap{};
-
 		std::string groupName{};
 
 		std::string line{};
@@ -156,10 +152,6 @@ namespace model::obj {
 
 				// インデックスを保存するVector
 				const int VEC_MAX_SIZE{ 4 };
-				std::vector<int>
-					vertIdxVec(VEC_MAX_SIZE, -1),
-					tecIdxVec(VEC_MAX_SIZE, -1),
-					norIdxVec(VEC_MAX_SIZE, -1);
 
 				const int VERTEX_SIZE{ static_cast<int>(vertices.size()) };
 				const int TEXCOORD_SIZE{ static_cast<int>(texcoords.size()) };
@@ -189,7 +181,7 @@ namespace model::obj {
 					}
 				};
 
-				auto hoge{
+				const auto readIndex{
 					[&](const std::string& unit) -> std::tuple<int, int, int> {
 						int vIndex{ -1 };
 						int vtIndex{ -1 };
@@ -200,125 +192,42 @@ namespace model::obj {
 						// 要素が1なら[頂点]
 						if (splitUnit.size() == 1) {
 							// 頂点
-							// vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
-
-							if (vecVertIdxMap.contains(splitUnit[0])) {
-								vIndex = vecVertIdxMap[splitUnit[0]];
-							}
-							else {
-								vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
-								vecVertIdxMap[splitUnit[0]] = vIndex;
-							}
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 						}
 
 						// 要素が2なら[頂点, UV]
 						if (splitUnit.size() == 2) {
 							// 頂点
-							// vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
-							if (vecVertIdxMap.contains(splitUnit[0])) {
-								vIndex = vecVertIdxMap[splitUnit[0]];
-							}
-							else {
-								vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
-								vecVertIdxMap[splitUnit[0]] = vIndex;
-							}
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 
 							// テクスチャ座標
-							// vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
-							if (vecIndxIdxMap.contains(splitUnit[1])) {
-								vtIndex = vecIndxIdxMap[splitUnit[1]];
-							}
-							else {
-								vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
-								vecIndxIdxMap[splitUnit[1]] = vtIndex;
-							}
+							vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
 						}
 
 						// 要素が3なら[頂点, UV, 法線]
 						// 要素が3かつ真ん中が空白の場合[頂点, , 法線]
 						if (splitUnit.size() == 3) {
 							// 頂点
-							// vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
-
-							if (vecVertIdxMap.contains(splitUnit[0])) {
-								vIndex = vecVertIdxMap[splitUnit[0]];
-							}
-							else {
-								vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
-								vecVertIdxMap[splitUnit[0]] = vIndex;
-							}
+							vIndex = parseInteger(splitUnit[0], VERTEX_SIZE);
 
 							// テクスチャ座標は、値が入っていたら変換する
 							if (!splitUnit[1].empty() && splitUnit[1] != " ") {
-								// vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
-
-								if (vecIndxIdxMap.contains(splitUnit[1])) {
-									vtIndex = vecIndxIdxMap[splitUnit[1]];
-								}
-								else {
-									vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
-									vecIndxIdxMap[splitUnit[1]] = vtIndex;
-								}
+								vtIndex = parseInteger(splitUnit[1], TEXCOORD_SIZE);
 							}
 
 							// 法線
-							// vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
-							if (vecNormIdxMap.contains(splitUnit[2])) {
-								vnIndex = vecNormIdxMap[splitUnit[2]];
-							}
-							else {
-								vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
-								vecNormIdxMap[splitUnit[2]] = vnIndex;
-							}
+							vnIndex = parseInteger(splitUnit[2], NORMAL_SIZE);
 						}
 
 						return { vIndex, vtIndex, vnIndex };
 					}
 				};
 
-				//using Vt = std::vector<std::tuple<int, int, int>>;
-				//Vt faceVec{};
-
-				//std::vector<std::string> sLine = split(oneLine, CHAR_BLANK);
-				//for (const auto& unit : sLine) {
-				//	faceVec.push_back(hoge(unit));
-				//}
-				//
-				//int faceNum{ static_cast<int>(ceil(static_cast<double>(faceVec.size()) / 3.0)) };
-				//for (int i{ 0 }; i < faceNum; ++i) {
-
-				//	for (int idx{ i }; idx < 3 + i /*faceVec.size()*/; ++idx) {
-				//		// int hogei = (idx + 1) % faceVec.size();
-				//		const auto& [vIndex, vtIndex, vnIndex] = faceVec[idx];
-
-				//		// 取得したインデックスからObjVertexを作成する
-				//		ObjVertex oVertex{};
-
-				//		// 頂点
-				//		if (vIndex >= 0) {
-				//			oVertex.position = vertices[vIndex];
-				//		}
-
-				//		//  テクスチャ座標
-				//		if (vtIndex >= 0) {
-				//			oVertex.texcoord = texcoords[vtIndex];
-				//		}
-
-				//		// 法線
-				//		if (vnIndex >= 0) {
-				//			oVertex.normal = normals[vnIndex];
-				//		}
-
-				//		objVertices.emplace_back(oVertex);
-				//	}
-				//}
-
-
 				int count{ 0 };
 				std::vector<std::string> sLine = split(oneLine, CHAR_BLANK);
 				for (const auto& unit : sLine) {
 
-					const auto& [vIndex, vtIndex, vnIndex] = hoge(unit);
+					const auto& [vIndex, vtIndex, vnIndex] = readIndex(unit);
 					//std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
 
 					// 取得したインデックスからObjVertexを作成する
@@ -352,7 +261,7 @@ namespace model::obj {
 					for (int i{ 1 }; i < sLine.size(); ++i) {
 						int hogei = (i + 1) % 4;
 						auto& unit = sLine[hogei];
-						const auto& [vIndex, vtIndex, vnIndex] = hoge(unit);
+						const auto& [vIndex, vtIndex, vnIndex] = readIndex(unit);
 						// std::cout << "{ " << vIndex << ", " << vtIndex << ", " << vnIndex << " }" << std::endl;
 
 						// 取得したインデックスからObjVertexを作成する
