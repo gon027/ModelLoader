@@ -91,6 +91,8 @@ namespace model::obj {
 		std::unordered_map<std::string, int> vecIndxIdxMap{};
 		std::unordered_map<std::string, int> vecNormIdxMap{};
 
+		std::string groupName{};
+
 		std::string line{};
 		while (true) {
 
@@ -107,6 +109,10 @@ namespace model::obj {
 
 			if (line == "mtllib") {
 				ifs >> mtlFileName;
+			}
+
+			if (line == "o") {
+				ifs >> groupName;
 			}
 
 			if (line == "v") {

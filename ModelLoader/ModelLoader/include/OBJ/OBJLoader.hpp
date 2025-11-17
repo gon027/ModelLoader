@@ -38,9 +38,10 @@ namespace model::obj {
 		// ƒ}ƒeƒŠƒAƒ‹
 		ObjMaterial material;
 
-		std::vector<ObjMaterial> objMaterials;
-
 		std::string mtlFileName;
+
+		std::vector<ObjVertex> objVertices2;
+		std::vector<ObjMaterial> objMaterials;
 	};
 
 }
